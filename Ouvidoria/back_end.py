@@ -1,27 +1,32 @@
-import os
-from mysql import connector
+import mysql.connector
+from flask import Flask, jsonify
+import flask_cors
 
-# Estabelecer conexão com o banco de dados MySQL específico
-try:
-    with connector.connect(
+app = Flask(__name__)
+flask_cors.CORS(app)  # Habilita CORS para todas as rotas
+
+@app.route('/ativar-usuarios', methods=['POST'])
+def ativar_usuarios():
+    # Conexão com o banco de dados
+    cnx = mysql.connector.connect(
         host="127.0.0.1",
-        port=3306,  # Certifique-se de usar um número inteiro para a porta
+        port="3306",
         user="root",
         password="lcn2505@K",
-        database="ouvidoria"  # Nome do banco de dados
-    ) as database:
-        print("Conexão bem-sucedida ao banco de dados 'trabalho_final'")
+        database="ouvidoria"
+    )
 
-        # Criar um cursor para executar a consulta
-        with database.cursor() as cursor:
-            # Executar a consulta para listar todas as tabelas
-            cursor.execute("SHOW TABLES")
+    cursor = cnx.cursor(dictionary=True)  # Retorna resultados como dicionários
 
-            # Recuperar e imprimir o resultado
-            tables = cursor.fetchall()
-            print("Tabelas em 'ouvidoria':")
-            for table in tables:
-                print(table[0])
+    query = "SELECT * FROM usuarios"
+    cursor.execute(query)
 
-except connector.Error as e:
-    print("Erro de conexão ou execução:", e)
+    resultado = cursor.fetchall()
+
+    cursor.close()
+    cnx.close()
+
+    return jsonify(resultado), 200
+
+if __name__ == '__main__':
+    app.run(debug=True)

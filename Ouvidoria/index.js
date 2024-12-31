@@ -305,90 +305,67 @@ function ativarFluxo() {
     };
 };
 
-// Função para ativar o botão "Usuários"
 function ativarUsuarios() {
-    
-    if (document.getElementById('btn-users').className != 'menu-item-config active') {
-        resetarAtivo();
-        const usuarios = document.getElementById('btn-users');
-        const configMain = document.getElementById('main_config');
-        
-        usuarios.className = 'menu-item-config active';
-        
-        configMain.innerHTML = `
-            <div class="content-config">
-                <a class="config-exit" id="closeConfig">x</a>
-            </div>
-            <div class="list-users" id="list-users">
-              <div class="user-item">
-                <div class="user-info">
-                  <div class="user-avatar">U</div>
-                  <div class="user-details">
-                    <span>User@gmail.com</span>
-                    <span class="key-user" contenteditable="true">********</span>
-                  </div>
-                </div>
-                <select class="user-role">
-                  <option selected>Administrador</option>
-                  <option>Atendente</option>
-                  <option>Desativado</option>
-                  <option>Excluir</option>
-                </select>
-              </div>
+  const btnUsers = document.getElementById('btn-users');
+  if (btnUsers.classList.contains('active')) return;
 
-              <div class="user-item">
-                <div class="user-info">
-                  <div class="user-avatar">U</div>
-                  <div class="user-details">
-                    <span>User@gmail.com</span>
-                    <span class="key-user" contenteditable="true">********</span>
-                  </div>
-                </div>
-                <select class="user-role">
-                  <option>Administrador</option>
-                  <option selected>Atendente</option>
-                  <option>Desativado</option>
-                  <option>Excluir</option>
-                </select>
-              </div>
+  resetarAtivo();
+  btnUsers.classList.add('active');
 
-              <div class="user-item">
-                <div class="user-info">
-                  <div class="user-avatar">U</div>
-                  <div class="user-details">
-                    <span>User@gmail.com</span>
-                    <span class="key-user" contenteditable="true">********</span>
-                  </div>
-                </div>
-                <select class="user-role">
-                  <option>Administrador</option>
-                  <option selected>Atendente</option>
-                  <option>Desativado</option>
-                  <option>Excluir</option>
-                </select>
-              </div>
+  const configMain = document.getElementById('main_config');
+  configMain.innerHTML = `
+      <div class="content-config">
+          <a class="config-exit" id="closeConfig">x</a>
+      </div>
+      <div class="list-users" id="list-users"></div>
+  `;
 
-              <div class="user-item">
-                <div class="user-info">
-                  <div class="user-avatar">U</div>
-                  <div class="user-details">
-                    <span>User@gmail.com</span>
-                    <span class="key-user" contenteditable="true">********</span>
-                  </div>
-                </div>
-                <select class="user-role">
-                  <option>Administrador</option>
-                  <option selected>Atendente</option>
-                  <option>Desativado</option>
-                  <option>Excluir</option>
-                </select>
-              </div>
-              <p class="add-task">Adicionar</p>
-            </div>
-        `;
+  fetchUsuarios();
 
-        document.getElementById('closeConfig').addEventListener('click', desativarConfig);
-    }; 
+  document.getElementById('closeConfig').addEventListener('click', desativarConfig);
+}
+
+async function fetchUsuarios() {
+  try {
+      const response = await fetch('http://127.0.0.1:5000/ativar-usuarios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const data = await response.json();
+      renderizarUsuarios(data);
+  } catch (error) {
+      console.error('Erro ao ativar usuários:', error);
+  }
+}
+
+function renderizarUsuarios(usuarios) {
+  const listUsers = document.getElementById('list-users');
+  const roles = ['administrador', 'atendente', 'desativado'];
+
+  const usuariosHTML = usuarios.map(({ id_user, email, permissoes, senha }) => `
+      <div class="user-item">
+          <div class="user-info" id="${id_user}">
+              <div class="user-avatar">${email[0].toUpperCase()}</div>
+              <div class="user-details">
+                  <span>${email}</span>
+                  <span class="key-user">${senha}</span>
+              </div>
+          </div>
+          <select class="user-role">
+              ${roles.map(role => `
+                  <option value="${role}" ${permissoes === role ? 'selected' : ''}>
+                      ${role}
+                  </option>
+              `).join('')}
+              <option value="excluir">excluir</option>
+          </select>
+      </div>
+  `).join('');
+
+  listUsers.innerHTML = usuariosHTML + '<p class="add-task">Adicionar</p>';
 };
 
 // Remove a classe 'active' de todos os botões
