@@ -277,37 +277,84 @@ function ativarSistema() {
 
 // Função para ativar o botão "Fluxo"
 function ativarFluxo() {
-    if (document.getElementById('btn-fluxo').className != 'menu-item-config active') {
-        resetarAtivo();
-        const fluxo = document.getElementById('btn-fluxo');
-        const configMain = document.getElementById('main_config');
+  const btnFluxo = document.getElementById('btn-fluxo');
+  if (btnFluxo.classList.contains('active')) return;
 
-        fluxo.className = 'menu-item-config active';
+  resetarAtivo();
+  btnFluxo.classList.add('active');
 
-        configMain.innerHTML = `
-            <div class="content-config">
-                <a class="config-exit" id="closeConfig">x</a>
-            </div>
-            <div class="task-list">
-                <div class="task-item">
-                  <span contenteditable="true">Recepção da solicitação</span>
-                  <a class="delete-button">×</a>
-                </div>
-                <div class="task-item">
-                  <span contenteditable="true">Classificação</span>
-                  <a class="delete-button">×</a>
-                </div>
-                <div class="task-item">
-                  <span contenteditable="true">Encaminhamento</span>
-                  <a class="delete-button">×</a>
-                </div>
-                <p class="add-task">Adicionar</p>
-            </div>
-        `;
+  const configMain = document.getElementById('main_config');
+  configMain.innerHTML = `
+      <div class="content-config">
+          <a class="config-exit" id="closeConfig">x</a>
+      </div>
+      <div class="task-list" id="task-list"></div>
+  `;
 
-        document.getElementById('closeConfig').addEventListener('click', desativarConfig);
+  fetchFluxos();
 
-    };
+  document.getElementById('closeConfig').addEventListener('click', desativarConfig);
+};
+
+async function fetchFluxos() {
+  try {
+      const response = await fetch('http://127.0.0.1:5000/ativar-fluxo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const data = await response.json();
+      renderizarFluxos(data);
+  } catch (error) {
+      console.error('Erro ao ativar fluxos:', error);
+  };
+};
+
+function renderizarFluxos(fluxos) {
+  const taskList = document.getElementById('task-list');
+  
+  // Ordenar fluxos por posição
+  fluxos.sort((a, b) => a.posicao - b.posicao);
+
+  const fluxosHTML = fluxos.map(({ id_fluxo, nome }) => `
+      <div class="task-item" data-id="${id_fluxo}">
+          <span contenteditable="true">${nome}</span>
+          <a class="delete-button">×</a>
+      </div>
+  `).join('');
+
+  taskList.innerHTML = fluxosHTML + '<p class="add-task">Adicionar</p>';
+
+  // Adicionar event listeners para os botões de deletar
+  document.querySelectorAll('.delete-button').forEach(button => {
+      button.addEventListener('click', function() {
+          this.closest('.task-item').remove();
+      });
+  });
+
+  // Adicionar event listener para o botão "Adicionar"
+  document.querySelector('.add-task').addEventListener('click', adicionarNovoFluxo);
+};
+
+function adicionarNovoFluxo() {
+  const taskList = document.getElementById('task-list');
+  const novoId = Date.now(); // Usar timestamp como ID temporário
+  const novoFluxo = document.createElement('div');
+  novoFluxo.className = 'task-item';
+  novoFluxo.dataset.id = novoId;
+  novoFluxo.innerHTML = `
+      <span contenteditable="true">Novo Fluxo</span>
+      <a class="delete-button">×</a>
+  `;
+
+  taskList.insertBefore(novoFluxo, taskList.lastElementChild);
+
+  // Adicionar event listener para o novo botão de deletar
+  novoFluxo.querySelector('.delete-button').addEventListener('click', function() {
+      novoFluxo.remove();
+  });
 };
 
 function ativarUsuarios() {
@@ -328,7 +375,7 @@ function ativarUsuarios() {
   fetchUsuarios();
 
   document.getElementById('closeConfig').addEventListener('click', desativarConfig);
-}
+};
 
 async function fetchUsuarios() {
   try {
@@ -343,8 +390,8 @@ async function fetchUsuarios() {
       renderizarUsuarios(data);
   } catch (error) {
       console.error('Erro ao ativar usuários:', error);
-  }
-}
+  };
+};
 
 function renderizarUsuarios(usuarios) {
   const listUsers = document.getElementById('list-users');
@@ -423,32 +470,23 @@ function ativarConfig()  {
           <button class="menu-item-config" onclick="ativarTags()" id="btn-tags">Tags</button>
         </aside>
         <main class="main-config" id="main_config">
-            <div class="content-config">
-                <a class="config-exit" id="closeConfig">x</a>
-            </div>
-            <div class="task-list">
-                <div class="task-item">
-                  <span contenteditable="true">Recepção da solicitação</span>
-                  <a class="delete-button">×</a>
-                </div>
-                <div class="task-item">
-                  <span contenteditable="true">Classificação</span>
-                  <a class="delete-button">×</a>
-                </div>
-                <div class="task-item">
-                  <span contenteditable="true">Encaminhamento</span>
-                  <a class="delete-button">×</a>
-                </div>
-                <p class="add-task">Adicionar</p>
-            </div>
         </main>
     `;
 
     document.body.appendChild(configPanel);
-    
-    // Adicionar evento para fechar as configurações
+
+    const configMain = document.getElementById('main_config');
+    configMain.innerHTML = `
+        <div class="content-config">
+            <a class="config-exit" id="closeConfig">x</a>
+        </div>
+        <div class="task-list" id="task-list"></div>
+    `;
+  
+    fetchFluxos();
+  
     document.getElementById('closeConfig').addEventListener('click', desativarConfig);
-};
+  };
 
 function desativarConfig() {
     const elemento = document.querySelector('.container');
