@@ -8,7 +8,7 @@ try:
         port=3306,  # Certifique-se de usar um número inteiro para a porta
         user="root",
         password="lcn2505@K",
-        database="rpg"  # Nome do banco de dados
+        database="ouvidoria"  # Nome do banco de dados
     ) as database:
         print("Conexão bem-sucedida ao banco de dados 'trabalho_final'")
 
@@ -19,7 +19,7 @@ try:
 
             # Recuperar e imprimir o resultado
             tables = cursor.fetchall()
-            print("Tabelas em 'trabalho_final':")
+            print("Tabelas em 'ouvidoria':")
             for table in tables:
                 print(table[0])
 
