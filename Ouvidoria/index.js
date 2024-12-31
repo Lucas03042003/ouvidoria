@@ -172,73 +172,78 @@ function abrirExluidos() {
 };
 
 function ativarTags() {
-  if (document.getElementById('btn-tags').className != 'menu-item-config active') {
-    resetarAtivo();
-    const tag = document.getElementById('btn-tags');
-    const configMain = document.getElementById('main_config');
+  const btnTags = document.getElementById('btn-tags');
+  if (btnTags.classList.contains('active')) return;
 
-    tag.className = 'menu-item-config active';
+  resetarAtivo();
+  btnTags.classList.add('active');
 
-    configMain.innerHTML = `
-    <div class="content-config">
-        <a class="config-exit" id="closeConfig">x</a>
-    </div>
-    <div class="tag-container">
-      <div class="tags-list">
-        <div class="tag-item">
-          <span contenteditable="true" class="tag-btn" id="btn-cor1">Banheiros</span>
-          <div class="tag-details">
-            <input type="color" id="colorPickerTag1" class="color-input" value="#6faeff"> Cor da tag
-            <input type="color" id="colorPickerTxt1" class="color-input" value="#f4f4f4"> Cor do texto
-          </div>
-        </div>
-
-        <div class="tag-item">
-          <span contenteditable="true" class="tag-btn" id="btn-cor2">Banheiros</span>
-          <div class="tag-details">
-            <input type="color" id="colorPickerTag2" class="color-input" value="#6faeff"> Cor da tag
-            <input type="color" id="colorPickerTxt2" class="color-input" value="#f4f4f4"> Cor do texto
-          </div>
-        </div>
-
-        <div class="tag-item">
-          <span contenteditable="true" class="tag-btn" id="btn-cor3">Banheiros</span>
-          <div class="tag-details">
-            <input type="color" id="colorPickerTag3" class="color-input" value="#6faeff"> Cor da tag
-            <input type="color" id="colorPickerTxt3" class="color-input" value="#f4f4f4"> Cor do texto
-          </div>
-        </div>
+  const configMain = document.getElementById('main_config');
+  configMain.innerHTML = `
+      <div class="content-config">
+          <a class="config-exit" id="closeConfig">x</a>
       </div>
-      <p class="add-task">Adicionar</p>
-    </div>
-    `;
+      <div class="tag-container">
+          <div class="tags-list" id="tags-list"></div>
+          <p class="add-task">Adicionar</p>
+      </div>
+  `;
 
-    // Função para atualizar as cores de fundo e texto dos botões
-    const atualizarCores = (btnId, tagColorId, textColorId) => {
-      const btn = document.getElementById(btnId);
-      const tagColorPicker = document.getElementById(tagColorId);
-      const textColorPicker = document.getElementById(textColorId);
+  fetchTags();
 
-      // Atualizar a cor de fundo do botão
-      tagColorPicker.addEventListener('input', function () {
-        btn.style.backgroundColor = this.value;
+  document.getElementById('closeConfig').addEventListener('click', desativarConfig);
+};
+
+async function fetchTags() {
+  try {
+      const response = await fetch('http://127.0.0.1:5000/ativar-tag', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
       });
 
-      // Atualizar a cor do texto do botão
-      textColorPicker.addEventListener('input', function () {
-        btn.style.color = this.value;
-      });
-    };
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-    // Associar os inputs de cor aos botões
-    atualizarCores('btn-cor1', 'colorPickerTag1', 'colorPickerTxt1');
-    atualizarCores('btn-cor2', 'colorPickerTag2', 'colorPickerTxt2');
-    atualizarCores('btn-cor3', 'colorPickerTag3', 'colorPickerTxt3');
-
-    // Adicionar evento para fechar as configurações
-    document.getElementById('closeConfig').addEventListener('click', desativarConfig);
+      const data = await response.json();
+      renderizarTags(data);
+  } catch (error) {
+      console.error('Erro ao ativar tags:', error);
   };
 };
+
+function renderizarTags(tags) {
+  const tagsList = document.getElementById('tags-list');
+  
+  const tagsHTML = tags.map(({ cor_tag, cor_texto, id_tag, titulo }) => `
+      <div class="tag-item">
+          <span contenteditable="true" class="tag-btn" id="btn-cor${id_tag}" style="background-color: ${cor_tag}; color: ${cor_texto};">${titulo}</span>
+          <div class="tag-details">
+              <input type="color" id="colorPickerTag${id_tag}" class="color-input" value="${cor_tag}"> Cor da tag
+              <input type="color" id="colorPickerTxt${id_tag}" class="color-input" value="${cor_texto}"> Cor do texto
+          </div>
+      </div>
+  `).join('');
+
+  tagsList.innerHTML = tagsHTML;
+
+  // Adicionar event listeners para os color pickers
+  tags.forEach(({ id_tag }) => {
+      atualizarCores(`btn-cor${id_tag}`, `colorPickerTag${id_tag}`, `colorPickerTxt${id_tag}`);
+  });
+};
+
+function atualizarCores(btnId, tagColorId, textColorId) {
+  const btn = document.getElementById(btnId);
+  const tagColorPicker = document.getElementById(tagColorId);
+  const textColorPicker = document.getElementById(textColorId);
+
+  tagColorPicker.addEventListener('input', function () {
+      btn.style.backgroundColor = this.value;
+  });
+
+  textColorPicker.addEventListener('input', function () {
+      btn.style.color = this.value;
+  });
+}
 
 // Função para ativar o botão "Sistema"
 function ativarSistema() {
