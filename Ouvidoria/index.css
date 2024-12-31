@@ -1,0 +1,577 @@
+* {
+    font-family: sans-serif;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* 
+* {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+} */
+
+.cabecalho {
+    flex: 1;
+    background-color: #333;
+    color:antiquewhite;
+    width: auto;    
+    height: 60px;
+    max-height: 60px;
+    border-radius: 5px 5px 0px 0px;
+    padding: 10px 0px 0px 20px;
+}
+
+.content {
+    flex: 1;
+    flex-direction: column;
+    background-color: #333;
+    display: flex;
+    min-height: 640px;
+    height: auto;
+    justify-content: left;
+}
+
+.content-2 {
+    background-color: #333;
+    justify-content: left;
+    align-items: start;
+    width: 100px;
+    min-height: 690px;
+    height: auto;
+    padding: 5px 20px 5px 20px;
+    display: flex;
+    border-radius: 0px 0px 0px 5px;
+    flex-direction: column;
+}
+
+.img-login {
+    max-height: 40px;
+    max-width: 100%;
+    margin-right: 0px;
+    margin-left: 96%;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+.img-config {
+    max-height: 40px;
+    max-width: 20%;
+    margin-top: auto;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.body-config {
+    font-family: Arial, sans-serif;
+    display: flex;
+}
+
+.sidebar-config {
+    background-color: #2c2c2e;
+    width: 20%;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-right: 1px solid #3a3a3c;
+}
+
+.menu-item-config {
+    background-color: #3a3a3c;
+    color: #fff;
+    padding: 0.8rem 1rem;
+    border: none;
+    border-radius: 5px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.menu-item-config:hover {
+    background-color: #4a4a4c;
+}
+
+.menu-item-config.active {
+    background-color: #3a6ea5;
+}
+
+.main-config {
+    flex: 1;
+    padding: 2rem;
+
+}
+
+.task-list {
+    max-width: 500px;
+    margin: 0 auto;
+    margin-top: 1%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    height: 100%;
+}
+
+.task-item {
+    background-color: #f5f5f5;
+    color: #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.task-item span {
+    font-size: 1rem;
+}
+
+.delete-button {
+    background: none;
+    border: none;
+    color: red;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+.delete-button:hover {
+    color: darkred;
+}
+
+
+.add-task {
+    color: #a9a9a9;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 1rem;
+    cursor: pointer;
+}
+
+.add-task:hover {
+    color: #fff;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 50px;
+  height: 24px;
+  background-color: #ccc;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-switch::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.toggle-switch.active {
+  background-color: #4caf50;
+}
+
+.toggle-switch.active::before {
+  transform: translateX(26px);
+}
+
+.text_config_sis {
+    color: #f4f4f4;
+}
+
+.list-users {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    height: 100%;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #3a3a3a;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #2d2d2d;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-details span {
+  font-size: 0.9rem;
+}
+
+.user-details span:first-child {
+  font-weight: bold;
+}
+
+.user-role {
+  background-color: #f5f5f5;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.user-role:hover {
+  background-color: #e0e0e0;
+}
+
+.key-user {
+    margin-top: 6px;
+}
+
+.config-exit {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    font-size: 1.5rem;
+    font-family: sans-serif;
+    color: rgb(54, 107, 156);
+    background-color: #333;
+    border-color: #333;
+    border-radius: 0px 5px 0px 0px;
+    width: 4%;
+    cursor: pointer;
+    box-shadow: -3px 3px 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.config-exit:hover {
+    color: #005bb5;
+}
+
+.linha-config {
+    background-color: #245582;
+    width: 1px;
+    height: 100%;
+    margin-left: 20%;
+}
+
+.content-config {
+    display: flex;
+    width: 100%;
+    justify-content: right;
+}
+
+.container {
+    display: flex;
+    height: 100%;
+}
+
+.menu {
+    background-color: #2b5c8a;
+    width: 200;
+    min-height: 690px;
+    height: auto;
+    padding: 5px 20px 5px 20px;
+    display: flex;
+    border-radius: 0px 0px 0px 5px;
+    flex-direction: column;
+}
+
+.menu .opcao {
+    text-decoration: none;
+    color: white;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #3a6ea5;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    border-radius: 5px;
+    max-width: 140px;
+    cursor: pointer;
+}
+
+.menu .opcao:hover {
+    background-color: #4177b2;
+}
+
+.btn-menu {
+    color: #f4f4f4;
+    font-size: 40px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+.btn-menu-2 {
+    color: #f4f4f4;
+    font-size: 40px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-left: auto;
+}
+
+.menu .selecionado{
+    color:#2b5c8a;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+    background-color: #94c4ec;
+    text-decoration: none;
+    margin: 10px 0;
+    padding: 10px;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    border-radius: 5px;
+    max-width: 140px;
+    cursor:default;
+}
+
+.action-buttons {
+    position: absolute;
+    bottom: 10px; /* Ajusta a posição na parte inferior */
+    right: 10px; /* Ajusta a posição na parte direita */
+    display: flex;
+    gap: 10px; /* Espaço entre os botões */
+  }
+  
+.action-buttons .btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%; /* Torna os botões circulares */
+  font-size: 10px;
+  font-weight: bold;
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-check {
+  background-color: #28a745; /* Verde para o botão de check */
+}
+
+.btn-check:hover {
+  background-color: #218838; /* Verde escuro no hover */
+}
+
+.btn-cancel {
+  background-color: #dc3545; /* Vermelho para o botão de cancelar */
+}
+
+.btn-cancel:hover {
+  background-color: #c82333; /* Vermelho escuro no hover */
+}
+
+/* Menu de contexto */
+#context-menu {
+  position: absolute;
+  background-color: #333;
+  color: white;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+#context-menu.hidden {
+  display: none;
+}
+
+#context-menu button {
+  background: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+  text-align: left;
+}
+
+#context-menu button:hover {
+  background-color: #444;
+}
+
+/* Contêiner dos cartões */
+.finalizados-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 18rem)); 
+  /* gap: 20px;  */
+  /* padding: 20px; */
+  /* max-width: 1200px; */
+  margin-left: 50px;
+  /* max-width: 0.9vw; */
+  max-height: 90vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+/* Estilo do cartão */
+.finalizados-cards {
+  background-color: #1e5b9e; /* Azul do cartão */
+  border-radius: 10px; /* Bordas arredondadas */
+  padding: 15px 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombras */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Animação de hover */
+  margin: 60px 30px;
+  max-width: 300px;
+}
+
+/* Animação ao passar o mouse no cartão */
+.finalizados-cards:hover {
+  transform: translateY(-5px); /* Levanta o cartão */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Aumenta a sombra */
+}
+
+/* Formatação do texto */
+.finalizados-cards p {
+  /* margin: 10px 0; */
+  font-size: 16px;
+  line-height: 1.5;
+  color: #ffffff; /* Texto branco */
+  cursor: pointer;
+}
+
+.dupla-cards {
+  flex: 1;
+  flex-direction: column;
+  margin: 0px;
+  width: 300px;
+  height: 410px;
+  margin-bottom: 20px;
+}
+
+/* .content-kanban {
+  max-width: 0.9vw;
+  overflow-x: auto;
+  scrollbar-width: thin;
+} */
+
+.tag-container {
+  flex-grow: 1;
+  background-color: #2e2e2e; /* Fundo principal */
+  padding: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  gap: 20px;
+}
+
+/* Lista de tags */
+.tags-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Itens de tag */
+.tag-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.tag-btn {
+  background-color: #6faeff; /* Azul claro */
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #f4f4f4;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  min-width: 30%;
+}
+
+/* Detalhes da tag */
+.tag-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+/* Círculos de cor */
+.tag-circle {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.tag-circle.tag {
+  background-color: #6faeff;
+  cursor: pointer;
+}
+
+.tag-circle.txt {
+  background-color: #fff;
+  cursor: pointer;
+}
+
+/* Input de tamanho */
+.tag-input {
+  width: 50px;
+  padding: 5px;
+  border: none;
+  border-bottom: 2px solid #6faeff;
+  background: transparent;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  outline: none;
+}
+
+.color-input {
+  appearance: none; /* Remove o estilo padrão do input */
+  -webkit-appearance: none; /* Suporte para navegadores WebKit */
+  width: 20px;
+  height: 20px;
+  border-radius: 50%; /* Faz o input ser circular */
+  border: none;
+  cursor: pointer;
+  padding: 100;
+}
+
+.color-input::-webkit-color-swatch {
+  border: none; /* Remove a borda interna no Chrome */
+  border-radius: 50%;
+}
+
+.color-input::-moz-color-swatch {
+  border: none; /* Remove a borda interna no Firefox */
+  border-radius: 50%;
+}

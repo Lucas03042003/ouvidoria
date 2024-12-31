@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <link rel="stylesheet" href="index.css" media="screen">
+<head>
+    <title>Página Inicial</title>
+</head>
+<body>
+    <div class="container" id="docker">
+        <aside class="menu" id="menu">
+            <a href="#" class="btn-menu-2" id="menuBtn">≡</a>
+            <a href="#" class="selecionado" id="btn-home">Home</a>
+            <a href="#" class="opcao" id="btn-finalizados">Finalizados</a>
+            <a href="#" class="opcao" id="btn-excluidos">Excluídos</a>
+            <img class="img-config" src="galeria/config.png" id="config" alt="Imagem de config" title="Configurações"/>
+        </aside>
+        <div class="content" id="content">
+            <div class="cabecalho">
+                <img class="img-login" src="galeria/img_login.png" alt="Imagem de Login" id="btn-login"/>
+            </div>
+            <div class="kanban-div" id="content-kanban"></div>
+        </div>
+    </div>
+    
+    <script src="index.js"></script>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>$('#content-kanban').load('kanban.html');</script>
+
+</html>

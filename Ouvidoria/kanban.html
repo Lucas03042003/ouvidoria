@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="kanban/src/css/kanban.css">
+
+    <title>Kanban</title>
+</head>
+<body>
+    <main class="kanban">
+        <!-- COLUMN 1 -->
+        <div class="kanban-column" data-id="1">
+            <div class="kanban-title">
+                <h2>
+                    Recepção da solicitação
+                </h2>
+
+                <button class="add-card">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+
+            <div class="kanban-cards">
+                <div class="kanban-card" draggable="true">
+                    <div class="badge medium">
+                        <span>
+                            Média prioridade
+                        </span>
+                    </div>
+
+                    <div class="card-text">
+                        <a id="client">Cliente: João Carlos</a>
+                        <a id="date">Data: 01/02/2024</a>
+                    </div>
+
+                    <div class="card-infos">
+                        <div class="card-icons">
+                        </div>
+
+                        <div class="user">
+                            <img src="kanban/src/images/avatar2.png" alt="Avatar">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 2 -->
+        <div class="kanban-column" data-id="2">
+            <div class="kanban-title">
+                <h2>
+                    Classificação
+                </h2>
+
+                <button class="add-card">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+
+            <div class="kanban-cards">
+                <div class="kanban-card" draggable="true">
+                    <div class="badge high">
+                        <span id="tag">
+                            Alta prioridade
+                        </span>
+                    </div>
+
+                    <div class="card-text">
+                        <a id="client">Cliente: Pedro Lucas</a>
+                        <a id="date">Data: 01/04/2024</a>
+                    </div>
+
+                    <div class="card-infos">
+                        <div class="card-icons">
+                        </div>
+
+                        <div class="user">
+                            <img src="kanban/src/images/avatar3.png" alt="Avatar">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 3 -->
+        <div class="kanban-column" data-id="3">
+            <div class="kanban-title">
+                <h2>
+                    Encaminhamento
+                </h2>
+
+                <button class="add-card">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+
+            <div class="kanban-cards">
+                <div class="kanban-card" draggable="true">
+                    <div class="badge low">
+                        <span>
+                            Baixa prioridade
+                        </span>
+                    </div>
+
+                    <div class="card-text">
+                        <a id="client">Cliente: Rafaela</a>
+                        <a id="date">Data: 01/01/2025</a>
+                    </div>
+
+                    <div class="card-infos">
+                        <div class="card-icons">
+                        </div>
+
+                        <div class="user">
+                            <img src="kanban/src/images/avatar.png" alt="Avatar">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="kanban/src/javascript/kanban.js"></script>
+</body>
+</html>
