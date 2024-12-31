@@ -74,5 +74,28 @@ def ativar_fluxo():
 
     return jsonify(resultado), 200
 
+@app.route('/ativar-sistema', methods=['POST'])
+def ativar_sistema():
+    # Conexão com o banco de dados
+    cnx = mysql.connector.connect(
+        host="127.0.0.1",
+        port="3306",
+        user="root",
+        password="lcn2505@K",
+        database="ouvidoria"
+    )
+
+    cursor = cnx.cursor(dictionary=True)  # Retorna resultados como dicionários
+
+    query = "SELECT * FROM Config"
+    cursor.execute(query)
+
+    resultado = cursor.fetchall()
+
+    cursor.close()
+    cnx.close()
+
+    return jsonify(resultado), 200
+
 if __name__ == '__main__':
     app.run(debug=True)

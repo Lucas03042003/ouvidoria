@@ -243,37 +243,63 @@ function atualizarCores(btnId, tagColorId, textColorId) {
   textColorPicker.addEventListener('input', function () {
       btn.style.color = this.value;
   });
-}
+};
 
 // Função para ativar o botão "Sistema"
 function ativarSistema() {
+  const btnSis = document.getElementById('btn-sis');
+  if (btnSis.classList.contains('active')) return;
 
-    if (document.getElementById('btn-sis').className != 'menu-item-config active') {
-        resetarAtivo(); // Remove a classe 'active' de todos os botões
-        const sistema = document.getElementById('btn-sis');
-        const configMain = document.getElementById('main_config');
+  resetarAtivo();
+  btnSis.classList.add('active');
 
-        sistema.className = 'menu-item-config active'; // Ativa o botão "Sistema"
+  const configMain = document.getElementById('main_config');
+  configMain.innerHTML = `
+      <div class="content-config">
+          <a class="config-exit" id="closeConfig">x</a>
+      </div>
+      <div class="toggle-container">
+          <div class="toggle-switch" id="toggleSwitch"></div>
+          <span class="text_config_sis">Deletar somente cartões vazios</span>
+      </div>
+  `;
 
-        configMain.innerHTML = `
-            <div class="content-config">
-                <a class="config-exit" id="closeConfig">x</a>
-            </div>
-            <div class="toggle-container">
-              <div class="toggle-switch active"></div>
-              <span class="text_config_sis">Deletar somente cartões vazios</span>
-            </div>
-        `;
-        
-        // Adicionar evento para fechar as configurações
-        document.getElementById('closeConfig').addEventListener('click', desativarConfig);
+  fetchSistemaConfig();
 
-        // Script para alternar o estado do botão
-        document.querySelector('.toggle-switch').addEventListener('click', function () {
-          this.classList.toggle('active');
-        });
-    };
+  document.getElementById('closeConfig').addEventListener('click', desativarConfig);
 };
+
+async function fetchSistemaConfig() {
+  try {
+      const response = await fetch('http://127.0.0.1:5000/ativar-sistema', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const data = await response.json();
+      configurarToggleSwitch(data[0].config1);
+  } catch (error) {
+      console.error('Erro ao ativar sistema:', error);
+  };
+};
+
+function configurarToggleSwitch(isActive) {
+  const toggleSwitch = document.getElementById('toggleSwitch');
+  
+  if (isActive) {
+      toggleSwitch.classList.add('active');
+  } else {
+      toggleSwitch.classList.remove('active');
+  }
+
+  // Adiciona um event listener apenas para alternar visualmente o switch
+  toggleSwitch.addEventListener('click', function() {
+      this.classList.toggle('active');
+      console.log('Estado do toggle alterado (apenas visual)');
+  });
+}
 
 // Função para ativar o botão "Fluxo"
 function ativarFluxo() {
