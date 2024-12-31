@@ -1,3 +1,6 @@
+// Array global para armazenar todas as tags
+let todasAsTags = [];
+
 function expandirCardFinal(cliente, data, tag) {
   const elemento = document.querySelector('.container');
   elemento.style.filter = 'blur(5px)';
@@ -172,48 +175,49 @@ function abrirExluidos() {
 };
 
 function ativarTags() {
-  const btnTags = document.getElementById('btn-tags');
-  if (btnTags.classList.contains('active')) return;
+    const btnTags = document.getElementById('btn-tags');
+    if (btnTags.classList.contains('active')) return;
 
-  resetarAtivo();
-  btnTags.classList.add('active');
+    resetarAtivo();
+    btnTags.classList.add('active');
 
-  const configMain = document.getElementById('main_config');
-  configMain.innerHTML = `
-      <div class="content-config">
-          <a class="config-exit" id="closeConfig">x</a>
-      </div>
-      <div class="tag-container">
-          <div class="tags-list" id="tags-list"></div>
-          <p class="add-task">Adicionar</p>
-      </div>
-  `;
+    const configMain = document.getElementById('main_config');
+    configMain.innerHTML = `
+        <div class="content-config">
+            <a class="config-exit" id="closeConfig">x</a>
+        </div>
+        <div class="tag-container">
+            <div class="tags-list" id="tags-list"></div>
+            <p class="add-task">Adicionar</p>
+        </div>
+    `;
 
-  fetchTags();
+    fetchTags();
 
-  document.getElementById('closeConfig').addEventListener('click', desativarConfig);
+    document.getElementById('closeConfig').addEventListener('click', desativarConfig);
+    document.querySelector('.add-task').addEventListener('click', adicionarNovaTag);
 };
 
 async function fetchTags() {
-  try {
-      const response = await fetch('http://127.0.0.1:5000/ativar-tag', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-      });
+    try {
+        const response = await fetch('http://127.0.0.1:5000/ativar-tag', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+        });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const data = await response.json();
-      renderizarTags(data);
-  } catch (error) {
-      console.error('Erro ao ativar tags:', error);
-  };
+        todasAsTags = await response.json();
+        renderizarTags();
+    } catch (error) {
+        console.error('Erro ao ativar tags:', error);
+    }
 };
 
-function renderizarTags(tags) {
+function renderizarTags() {
   const tagsList = document.getElementById('tags-list');
   
-  const tagsHTML = tags.map(({ cor_tag, cor_texto, id_tag, titulo }) => `
+  const tagsHTML = todasAsTags.map(({ cor_tag, cor_texto, id_tag, titulo }) => `
       <div class="tag-item">
           <span contenteditable="true" class="tag-btn" id="btn-cor${id_tag}" style="background-color: ${cor_tag}; color: ${cor_texto};">${titulo}</span>
           <div class="tag-details">
@@ -226,23 +230,42 @@ function renderizarTags(tags) {
   tagsList.innerHTML = tagsHTML;
 
   // Adicionar event listeners para os color pickers
-  tags.forEach(({ id_tag }) => {
-      atualizarCores(`btn-cor${id_tag}`, `colorPickerTag${id_tag}`, `colorPickerTxt${id_tag}`);
+  todasAsTags.forEach(({ id_tag }) => {
+      atualizarCores(id_tag);
   });
 };
 
-function atualizarCores(btnId, tagColorId, textColorId) {
-  const btn = document.getElementById(btnId);
-  const tagColorPicker = document.getElementById(tagColorId);
-  const textColorPicker = document.getElementById(textColorId);
+function atualizarCores(id_tag) {
+  const btn = document.getElementById(`btn-cor${id_tag}`);
+  const tagColorPicker = document.getElementById(`colorPickerTag${id_tag}`);
+  const textColorPicker = document.getElementById(`colorPickerTxt${id_tag}`);
 
   tagColorPicker.addEventListener('input', function () {
       btn.style.backgroundColor = this.value;
+      // Atualizar a cor da tag no array
+      const tag = todasAsTags.find(t => t.id_tag === id_tag);
+      if (tag) tag.cor_tag = this.value;
   });
 
   textColorPicker.addEventListener('input', function () {
       btn.style.color = this.value;
+      // Atualizar a cor do texto no array
+      const tag = todasAsTags.find(t => t.id_tag === id_tag);
+      if (tag) tag.cor_texto = this.value;
   });
+};
+
+function adicionarNovaTag() {
+  const novoId = todasAsTags.length + 1;
+  const novaTag = {
+      id_tag: novoId,
+      titulo: 'Nova Tag',
+      cor_tag: '#6faeff',
+      cor_texto: '#f4f4f4'
+  };
+
+  todasAsTags.push(novaTag);
+  renderizarTags();
 };
 
 // Função para ativar o botão "Sistema"
