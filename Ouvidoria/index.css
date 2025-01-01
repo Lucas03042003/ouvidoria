@@ -141,17 +141,27 @@
     color: darkred;
 }
 
-
-.add-task {
-    color: #a9a9a9;
-    font-size: 0.9rem;
-    text-align: center;
-    margin-top: 1rem;
-    cursor: pointer;
+.lista-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
 }
 
-.add-task:hover {
-    color: #fff;
+.add-task, .save-button {
+  padding: 5px 10px;
+  margin-right: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.add-task:hover, .save-button:hover {
+color: #e0e0e0;
+}
+
+.save-button {
+  border: none;
 }
 
 .toggle-container {

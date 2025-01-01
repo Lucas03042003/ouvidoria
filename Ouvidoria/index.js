@@ -376,7 +376,7 @@ function renderizarFluxos() {
       </div>
   `).join('');
 
-  taskList.innerHTML = fluxosHTML + '<p class="add-task">Adicionar</p>';
+  taskList.innerHTML = fluxosHTML + '<div class="lista-actions"><a class="add-task"">Adicionar</a><a onclick="salvarTudo()" class="save-button">Salvar</a></div>';
 
   // Adicionar event listeners para os botões de deletar
   document.querySelectorAll('.delete-button').forEach(button => {
@@ -391,6 +391,16 @@ function renderizarFluxos() {
 };
 
 function adicionarNovoFluxo() {
+  
+  document.querySelectorAll('.task-item').forEach(item => {
+    const idFluxo = parseInt(item.dataset.id);
+    const nome = item.querySelector('span').textContent;
+    const fluxo = todosOsFluxos.find(f => f.id_fluxo === idFluxo);
+    if (fluxo) {
+        fluxo.nome = nome;
+    };
+  });
+
   const novoId = todosOsFluxos.length > 0 ? Math.max(...todosOsFluxos.map(f => f.id_fluxo)) + 1 : 1;
   const novaPosicao = todosOsFluxos.length > 0 ? Math.max(...todosOsFluxos.map(f => f.posicao)) + 1 : 1;
   const novoFluxo = {
@@ -406,6 +416,39 @@ function adicionarNovoFluxo() {
 function removerFluxo(idFluxo) {
   todosOsFluxos = todosOsFluxos.filter(fluxo => fluxo.id_fluxo !== idFluxo);
   renderizarFluxos();
+};
+
+function salvarTudo() {
+  // Atualizar os nomes dos fluxos com base no conteúdo atual dos spans
+  document.querySelectorAll('.task-item').forEach(item => {
+      const idFluxo = parseInt(item.dataset.id);
+      const nome = item.querySelector('span').textContent;
+      const fluxo = todosOsFluxos.find(f => f.id_fluxo === idFluxo);
+      if (fluxo) {
+          fluxo.nome = nome;
+      };
+  });
+
+  // Exibir o conteúdo atualizado de todosOsFluxos
+  console.log('Conteúdo de todosOsFluxos:');
+  console.table(todosOsFluxos);
+
+  alert("Alterações salvas com sucesso!");
+
+  // Enviar os dados para o servidor
+  enviarParaServidor(todosOsFluxos);
+};
+
+// Função auxiliar para enviar dados para o servidor
+function enviarParaServidor(dados) {
+  fetch('http://127.0.0.1:5000/salvar-fluxos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
+  })
+  .then(response => response.json())
+  .then(data => console.log('Resposta do servidor:', data))
+  .catch(error => console.error('Erro ao salvar fluxos:', error));
 };
 
 function ativarUsuarios() {
