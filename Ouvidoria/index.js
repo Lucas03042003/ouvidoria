@@ -1,5 +1,6 @@
-// Array global para armazenar todas as tags
+// Array global para armazenar todas as informações
 let todasAsTags = [];
+let todosOsUsuarios = [];
 
 function expandirCardFinal(cliente, data, tag) {
   const elemento = document.querySelector('.container');
@@ -435,24 +436,24 @@ async function fetchUsuarios() {
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const data = await response.json();
-      renderizarUsuarios(data);
+      todosOsUsuarios = await response.json();
+      renderizarUsuarios();
   } catch (error) {
       console.error('Erro ao ativar usuários:', error);
   };
 };
 
-function renderizarUsuarios(usuarios) {
+function renderizarUsuarios() {
   const listUsers = document.getElementById('list-users');
   const roles = ['administrador', 'atendente', 'desativado'];
 
-  const usuariosHTML = usuarios.map(({ id_user, email, permissoes, senha }) => `
+  const usuariosHTML = todosOsUsuarios.map(({ id_user, email, permissoes, senha }) => `
       <div class="user-item">
           <div class="user-info" id="${id_user}">
               <div class="user-avatar">${email[0].toUpperCase()}</div>
               <div class="user-details">
-                  <span>${email}</span>
-                  <span class="key-user">${senha}</span>
+                  <span contenteditable="true">${email}</span>
+                  <span class="key-user" contenteditable="true">${senha}</span>
               </div>
           </div>
           <select class="user-role">
@@ -467,6 +468,22 @@ function renderizarUsuarios(usuarios) {
   `).join('');
 
   listUsers.innerHTML = usuariosHTML + '<p class="add-task">Adicionar</p>';
+
+  // Adicionar event listener para o botão "Adicionar"
+  document.querySelector('.add-task').addEventListener('click', adicionarNovoUsuario);
+};
+
+function adicionarNovoUsuario() {
+  const novoId = todosOsUsuarios.length > 0 ? Math.max(...todosOsUsuarios.map(u => u.id_user)) + 1 : 1;
+  const novoUsuario = {
+      id_user: novoId,
+      email: 'novo@email.com',
+      permissoes: 'atendente',
+      senha: 'nova_senha'
+  };
+
+  todosOsUsuarios.push(novoUsuario);
+  renderizarUsuarios();
 };
 
 // Remove a classe 'active' de todos os botões
