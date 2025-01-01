@@ -112,6 +112,37 @@ def salvar_tags():
             cnx.rollback()
             cnx.close()
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/salvar-usuarios', methods=['POST'])
+def salvar_usuarios():
+    try:
+        novos_usuarios = request.json
+        cnx = get_db_connection()
+        cursor = cnx.cursor()
+
+        # Deletar todos os usuários existentes
+        cursor.execute("DELETE FROM Usuarios")
+
+        # Inserir os novos usuários
+        insert_query = "INSERT INTO Usuarios (id_user, email, permissoes, senha) VALUES (%s, %s, %s, %s)"
+        for usuario in novos_usuarios:
+            cursor.execute(insert_query, (
+                usuario['id_user'],
+                usuario['email'],
+                usuario['permissoes'],
+                usuario['senha']  # Nota: Considere usar hash para senhas em produção
+            ))
+
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+
+        return jsonify({"message": "Usuários atualizados com sucesso!"}), 200
+    except Exception as e:
+        if 'cnx' in locals() and cnx.is_connected():
+            cnx.rollback()
+            cnx.close()
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

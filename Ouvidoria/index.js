@@ -537,12 +537,18 @@ function renderizarUsuarios() {
       listUsers.appendChild(userItem);
   });
 
-  // Adicionar o botão "Adicionar" no final da lista
-  const addButton = document.createElement('p');
-  addButton.className = 'add-task';
-  addButton.textContent = 'Adicionar';
-  addButton.addEventListener('click', adicionarNovoUsuario);
-  listUsers.appendChild(addButton);
+  // Adicionar os botões "Adicionar" e "Salvar" no final da lista
+  const addButtons = document.createElement('div');
+  addButtons.className = 'lista-actions';
+  addButtons.innerHTML = `
+      <a class="add-task">Adicionar</a>
+      <a class="save-button">Salvar</a>
+  `;
+  listUsers.appendChild(addButtons);
+
+  // Adicionar event listeners aos botões
+  addButtons.querySelector('.add-task').addEventListener('click', adicionarNovoUsuario);
+  addButtons.querySelector('.save-button').addEventListener('click', enviarParaServidorUsers);
 };
 
 function criarElementoUsuario(usuario, roles) {
@@ -569,15 +575,14 @@ function criarElementoUsuario(usuario, roles) {
   `;
 
   // Adicionar event listeners para atualizar os dados do usuário
-  userItem.querySelector('.user-email').addEventListener('input', atualizarUsuario);
-  userItem.querySelector('.key-user').addEventListener('input', atualizarUsuario);
-  userItem.querySelector('.user-role').addEventListener('change', atualizarUsuario);
+  userItem.querySelector('.user-email').addEventListener('input', () => atualizarUsuario(userItem));
+  userItem.querySelector('.key-user').addEventListener('input', () => atualizarUsuario(userItem));
+  userItem.querySelector('.user-role').addEventListener('change', () => atualizarUsuario(userItem));
 
   return userItem;
 };
 
-function atualizarUsuario(event) {
-  const userItem = event.target.closest('.user-item');
+function atualizarUsuario(userItem) {
   const id_user = parseInt(userItem.dataset.id);
   const email = userItem.querySelector('.user-email').textContent;
   const senha = userItem.querySelector('.key-user').textContent;
@@ -606,8 +611,27 @@ function adicionarNovoUsuario() {
   const roles = ['administrador', 'atendente', 'desativado'];
   const novoElemento = criarElementoUsuario(novoUsuario, roles);
   
-  // Inserir o novo usuário antes do botão "Adicionar"
+  // Inserir o novo usuário antes dos botões de ação
   listUsers.insertBefore(novoElemento, listUsers.lastChild);
+};
+
+function enviarParaServidorUsers() {
+  const usuariosParaSalvar = todosOsUsuarios.filter(usuario => usuario.permissoes !== 'excluir');
+
+  fetch('http://127.0.0.1:5000/salvar-usuarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(usuariosParaSalvar)
+  })
+  .then(response => response.json())
+  .then(data => {
+      console.log('Resposta do servidor:', data);
+      alert("Alterações salvas com sucesso!");
+  })
+  .catch(error => {
+      console.error('Erro ao salvar usuários:', error);
+      alert("Erro ao salvar alterações. Por favor, tente novamente.");
+  });
 };
 
 // Remove a classe 'active' de todos os botões
