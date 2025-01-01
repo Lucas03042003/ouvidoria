@@ -491,30 +491,65 @@ function renderizarUsuarios() {
   const listUsers = document.getElementById('list-users');
   const roles = ['administrador', 'atendente', 'desativado'];
 
-  const usuariosHTML = todosOsUsuarios.map(({ id_user, email, permissoes, senha }) => `
-      <div class="user-item">
-          <div class="user-info" id="${id_user}">
-              <div class="user-avatar">${email[0].toUpperCase()}</div>
-              <div class="user-details">
-                  <span contenteditable="true">${email}</span>
-                  <span class="key-user" contenteditable="true">${senha}</span>
-              </div>
+  listUsers.innerHTML = '';  // Limpar a lista antes de renderizar
+
+  todosOsUsuarios.forEach(usuario => {
+      const userItem = criarElementoUsuario(usuario, roles);
+      listUsers.appendChild(userItem);
+  });
+
+  // Adicionar o botão "Adicionar" no final da lista
+  const addButton = document.createElement('p');
+  addButton.className = 'add-task';
+  addButton.textContent = 'Adicionar';
+  addButton.addEventListener('click', adicionarNovoUsuario);
+  listUsers.appendChild(addButton);
+};
+
+function criarElementoUsuario(usuario, roles) {
+  const userItem = document.createElement('div');
+  userItem.className = 'user-item';
+  userItem.dataset.id = usuario.id_user;
+
+  userItem.innerHTML = `
+      <div class="user-info" id="${usuario.id_user}">
+          <div class="user-avatar">${usuario.email[0].toUpperCase()}</div>
+          <div class="user-details">
+              <span class="user-email" contenteditable="true">${usuario.email}</span>
+              <span class="key-user" contenteditable="true">${usuario.senha}</span>
           </div>
-          <select class="user-role">
-              ${roles.map(role => `
-                  <option value="${role}" ${permissoes === role ? 'selected' : ''}>
-                      ${role}
-                  </option>
-              `).join('')}
-              <option value="excluir">excluir</option>
-          </select>
       </div>
-  `).join('');
+      <select class="user-role">
+          ${roles.map(role => `
+              <option value="${role}" ${usuario.permissoes === role ? 'selected' : ''}>
+                  ${role}
+              </option>
+          `).join('')}
+          <option value="excluir">excluir</option>
+      </select>
+  `;
 
-  listUsers.innerHTML = usuariosHTML + '<p class="add-task">Adicionar</p>';
+  // Adicionar event listeners para atualizar os dados do usuário
+  userItem.querySelector('.user-email').addEventListener('input', atualizarUsuario);
+  userItem.querySelector('.key-user').addEventListener('input', atualizarUsuario);
+  userItem.querySelector('.user-role').addEventListener('change', atualizarUsuario);
 
-  // Adicionar event listener para o botão "Adicionar"
-  document.querySelector('.add-task').addEventListener('click', adicionarNovoUsuario);
+  return userItem;
+};
+
+function atualizarUsuario(event) {
+  const userItem = event.target.closest('.user-item');
+  const id_user = parseInt(userItem.dataset.id);
+  const email = userItem.querySelector('.user-email').textContent;
+  const senha = userItem.querySelector('.key-user').textContent;
+  const permissoes = userItem.querySelector('.user-role').value;
+
+  const usuario = todosOsUsuarios.find(u => u.id_user === id_user);
+  if (usuario) {
+      usuario.email = email;
+      usuario.senha = senha;
+      usuario.permissoes = permissoes;
+  };
 };
 
 function adicionarNovoUsuario() {
@@ -527,7 +562,13 @@ function adicionarNovoUsuario() {
   };
 
   todosOsUsuarios.push(novoUsuario);
-  renderizarUsuarios();
+  
+  const listUsers = document.getElementById('list-users');
+  const roles = ['administrador', 'atendente', 'desativado'];
+  const novoElemento = criarElementoUsuario(novoUsuario, roles);
+  
+  // Inserir o novo usuário antes do botão "Adicionar"
+  listUsers.insertBefore(novoElemento, listUsers.lastChild);
 };
 
 // Remove a classe 'active' de todos os botões
