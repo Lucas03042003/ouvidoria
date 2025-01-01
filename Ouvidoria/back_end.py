@@ -61,10 +61,19 @@ def ativar_sistema():
 
 @app.route('/salvar-fluxos', methods=['POST'])
 def salvar_fluxos():
+    cnx = None
+    cursor = None
     try:
         novos_fluxos = request.json
         cnx = get_db_connection()
         cursor = cnx.cursor()
+
+        # Iniciar uma transação
+        cnx.start_transaction()
+
+        # Armazenar os fluxos antigos antes de deletá-los
+        cursor.execute("SELECT * FROM Fluxo")
+        fluxos_antigos = cursor.fetchall()
 
         # Deletar todos os fluxos existentes
         cursor.execute("DELETE FROM Fluxo")
@@ -74,20 +83,49 @@ def salvar_fluxos():
         for fluxo in novos_fluxos:
             cursor.execute(insert_query, (fluxo['id_fluxo'], fluxo['nome'], fluxo['posicao']))
 
+        # Se chegou até aqui sem erros, commit da transação
         cnx.commit()
-        cursor.close()
-        cnx.close()
-
+        
         return jsonify({"message": "Fluxos atualizados com sucesso!"}), 200
+
     except Exception as e:
+        # Se ocorrer qualquer erro, fazer rollback
+        if cnx:
+            cnx.rollback()
+            
+            # Tentar restaurar os fluxos antigos
+            try:
+                for fluxo in fluxos_antigos:
+                    cursor.execute(insert_query, fluxo)
+                cnx.commit()
+            except:
+                # Se falhar ao restaurar, pelo menos o banco estará vazio
+                cnx.rollback()
+        
         return jsonify({"error": str(e)}), 500
-    
+
+    finally:
+        # Fechar cursor e conexão, independentemente do resultado
+        if cursor:
+            cursor.close()
+        if cnx:
+            cnx.close()
+
 @app.route('/salvar-tags', methods=['POST'])
 def salvar_tags():
+    cnx = None
+    cursor = None
     try:
         novas_tags = request.json
         cnx = get_db_connection()
         cursor = cnx.cursor()
+
+        # Iniciar uma transação
+        cnx.start_transaction()
+
+        # Armazenar as tags antigas antes de deletá-las
+        cursor.execute("SELECT * FROM Tags")
+        tags_antigas = cursor.fetchall()
 
         # Deletar todas as tags existentes
         cursor.execute("DELETE FROM Tags")
@@ -102,23 +140,49 @@ def salvar_tags():
                 tag['cor_texto']
             ))
 
+        # Se chegou até aqui sem erros, commit da transação
         cnx.commit()
-        cursor.close()
-        cnx.close()
-
+        
         return jsonify({"message": "Tags atualizadas com sucesso!"}), 200
+
     except Exception as e:
-        if 'cnx' in locals() and cnx.is_connected():
+        # Se ocorrer qualquer erro, fazer rollback
+        if cnx:
             cnx.rollback()
-            cnx.close()
+            
+            # Tentar restaurar as tags antigas
+            try:
+                for tag in tags_antigas:
+                    cursor.execute(insert_query, tag)
+                cnx.commit()
+            except:
+                # Se falhar ao restaurar, pelo menos o banco estará vazio
+                cnx.rollback()
+        
         return jsonify({"error": str(e)}), 500
+
+    finally:
+        # Fechar cursor e conexão, independentemente do resultado
+        if cursor:
+            cursor.close()
+        if cnx:
+            cnx.close()
     
 @app.route('/salvar-usuarios', methods=['POST'])
 def salvar_usuarios():
+    cnx = None
+    cursor = None
     try:
         novos_usuarios = request.json
         cnx = get_db_connection()
         cursor = cnx.cursor()
+
+        # Iniciar uma transação
+        cnx.start_transaction()
+
+        # Armazenar os usuários antigos antes de deletá-los
+        cursor.execute("SELECT * FROM Usuarios")
+        usuarios_antigos = cursor.fetchall()
 
         # Deletar todos os usuários existentes
         cursor.execute("DELETE FROM Usuarios")
@@ -133,16 +197,34 @@ def salvar_usuarios():
                 usuario['senha']  # Nota: Considere usar hash para senhas em produção
             ))
 
+        # Se chegou até aqui sem erros, commit da transação
         cnx.commit()
-        cursor.close()
-        cnx.close()
-
+        
         return jsonify({"message": "Usuários atualizados com sucesso!"}), 200
+
     except Exception as e:
-        if 'cnx' in locals() and cnx.is_connected():
+        # Se ocorrer qualquer erro, fazer rollback
+        if cnx:
             cnx.rollback()
-            cnx.close()
+            
+            # Tentar restaurar os usuários antigos
+            try:
+                for usuario in usuarios_antigos:
+                    cursor.execute(insert_query, usuario)
+                cnx.commit()
+            except:
+                # Se falhar ao restaurar, pelo menos o banco estará vazio,
+                # que é melhor do que ter dados parcialmente atualizados
+                cnx.rollback()
+        
         return jsonify({"error": str(e)}), 500
+
+    finally:
+        # Fechar cursor e conexão, independentemente do resultado
+        if cursor:
+            cursor.close()
+        if cnx:
+            cnx.close()
 
 if __name__ == '__main__':
     app.run(debug=True)
