@@ -177,48 +177,48 @@ function abrirExluidos() {
 };
 
 function ativarTags() {
-    const btnTags = document.getElementById('btn-tags');
-    if (btnTags.classList.contains('active')) return;
+  const btnTags = document.getElementById('btn-tags');
+  if (btnTags.classList.contains('active')) return;
 
-    resetarAtivo();
-    btnTags.classList.add('active');
+  resetarAtivo();
+  btnTags.classList.add('active');
 
-    const configMain = document.getElementById('main_config');
-    configMain.innerHTML = `
-        <div class="content-config">
-            <a class="config-exit" id="closeConfig">x</a>
-        </div>
-        <div class="tag-container">
-            <div class="tags-list" id="tags-list"></div>
-            <p class="add-task">Adicionar</p>
-        </div>
-    `;
+  const configMain = document.getElementById('main_config');
+  configMain.innerHTML = `
+      <div class="content-config">
+          <a class="config-exit" id="closeConfig">x</a>
+      </div>
+      <div class="tag-container">
+          <div class="tags-list" id="tags-list"></div>
+          <p class="add-task">Adicionar</p>
+      </div>
+  `;
 
-    fetchTags();
+  fetchTags();
 
-    document.getElementById('closeConfig').addEventListener('click', desativarConfig);
-    document.querySelector('.add-task').addEventListener('click', adicionarNovaTag);
+  document.getElementById('closeConfig').addEventListener('click', desativarConfig);
+  document.querySelector('.add-task').addEventListener('click', adicionarNovaTag);
 };
 
 async function fetchTags() {
-    try {
-        const response = await fetch('http://127.0.0.1:5000/ativar-tag', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-        });
+  try {
+      const response = await fetch('http://127.0.0.1:5000/ativar-tag', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+      });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-        todasAsTags = await response.json();
-        renderizarTags();
-    } catch (error) {
-        console.error('Erro ao ativar tags:', error);
-    }
+      todasAsTags = await response.json();
+      renderizarTags();
+  } catch (error) {
+      console.error('Erro ao ativar tags:', error);
+  };
 };
 
 function renderizarTags() {
   const tagsList = document.getElementById('tags-list');
-  
+
   const tagsHTML = todasAsTags.map(({ cor_tag, cor_texto, id_tag, titulo }) => `
       <div class="tag-item">
           <span contenteditable="true" class="tag-btn" id="btn-cor${id_tag}" style="background-color: ${cor_tag}; color: ${cor_texto};">${titulo}</span>
@@ -235,6 +235,8 @@ function renderizarTags() {
   todasAsTags.forEach(({ id_tag }) => {
       atualizarCores(id_tag);
   });
+
+  atualizarTituloTags();
 };
 
 function atualizarCores(id_tag) {
@@ -257,8 +259,23 @@ function atualizarCores(id_tag) {
   });
 };
 
+function atualizarTituloTags() {
+  document.querySelectorAll('.tag-btn').forEach(tagBtn => {
+      tagBtn.addEventListener('input', function() {
+          const id_tag = parseInt(this.id.replace('btn-cor', ''));
+          const novoTitulo = this.textContent.trim();
+          
+          const tag = todasAsTags.find(t => t.id_tag === id_tag);
+          if (tag) {
+              tag.titulo = novoTitulo;
+              console.log(`Tag ${id_tag} atualizada: ${novoTitulo}`);
+          };
+      });
+  });
+};
+
 function adicionarNovaTag() {
-  const novoId = todasAsTags.length + 1;
+  const novoId = todasAsTags.length > 0 ? Math.max(...todasAsTags.map(t => t.id_tag)) + 1 : 1;
   const novaTag = {
       id_tag: novoId,
       titulo: 'Nova Tag',
