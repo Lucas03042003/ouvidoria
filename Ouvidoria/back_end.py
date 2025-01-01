@@ -81,6 +81,37 @@ def salvar_fluxos():
         return jsonify({"message": "Fluxos atualizados com sucesso!"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/salvar-tags', methods=['POST'])
+def salvar_tags():
+    try:
+        novas_tags = request.json
+        cnx = get_db_connection()
+        cursor = cnx.cursor()
+
+        # Deletar todas as tags existentes
+        cursor.execute("DELETE FROM Tags")
+
+        # Inserir as novas tags
+        insert_query = "INSERT INTO Tags (id_tag, titulo, cor_tag, cor_texto) VALUES (%s, %s, %s, %s)"
+        for tag in novas_tags:
+            cursor.execute(insert_query, (
+                tag['id_tag'],
+                tag['titulo'],
+                tag['cor_tag'],
+                tag['cor_texto']
+            ))
+
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+
+        return jsonify({"message": "Tags atualizadas com sucesso!"}), 200
+    except Exception as e:
+        if 'cnx' in locals() and cnx.is_connected():
+            cnx.rollback()
+            cnx.close()
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

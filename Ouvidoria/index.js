@@ -190,7 +190,10 @@ function ativarTags() {
       </div>
       <div class="tag-container">
           <div class="tags-list" id="tags-list"></div>
-          <p class="add-task">Adicionar</p>
+          <div class="lista-actions">
+            <a class="add-task"">Adicionar</a>
+            <a onclick="enviarParaServidorTags()" class="save-button">Salvar</a>
+          </div>
       </div>
   `;
 
@@ -285,6 +288,24 @@ function adicionarNovaTag() {
 
   todasAsTags.push(novaTag);
   renderizarTags();
+};
+
+async function enviarParaServidorTags() {
+  atualizarTituloTags();
+  todasAsTags.forEach(({ id_tag }) => {
+    atualizarCores(id_tag);
+  });
+
+  fetch('http://127.0.0.1:5000/salvar-tags', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(todasAsTags)
+  })
+  .then(response => response.json())
+  .then(data => console.log('Resposta do servidor:', data))
+  .catch(error => console.error('Erro ao salvar tags:', error));
+
+  alert("Alterações salvas com sucesso!");
 };
 
 // Função para ativar o botão "Sistema"
@@ -450,14 +471,15 @@ function salvarTudo() {
   console.log('Conteúdo de todosOsFluxos:');
   console.table(todosOsFluxos);
 
+  // Enviar os dados para o servidor
+  enviarParaServidorFluxo(todosOsFluxos);
+
   alert("Alterações salvas com sucesso!");
 
-  // Enviar os dados para o servidor
-  enviarParaServidor(todosOsFluxos);
 };
 
 // Função auxiliar para enviar dados para o servidor
-function enviarParaServidor(dados) {
+function enviarParaServidorFluxo(dados) {
   fetch('http://127.0.0.1:5000/salvar-fluxos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
