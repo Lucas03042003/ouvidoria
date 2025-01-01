@@ -1,4 +1,5 @@
 // Array global para armazenar todas as informações
+let todasOsFluxos = [];
 let todasAsTags = [];
 let todosOsUsuarios = [];
 
@@ -355,20 +356,20 @@ async function fetchFluxos() {
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const data = await response.json();
-      renderizarFluxos(data);
+      todosOsFluxos = await response.json();
+      renderizarFluxos();
   } catch (error) {
       console.error('Erro ao ativar fluxos:', error);
   };
 };
 
-function renderizarFluxos(fluxos) {
+function renderizarFluxos() {
   const taskList = document.getElementById('task-list');
   
   // Ordenar fluxos por posição
-  fluxos.sort((a, b) => a.posicao - b.posicao);
+  todosOsFluxos.sort((a, b) => a.posicao - b.posicao);
 
-  const fluxosHTML = fluxos.map(({ id_fluxo, nome }) => `
+  const fluxosHTML = todosOsFluxos.map(({ id_fluxo, nome }) => `
       <div class="task-item" data-id="${id_fluxo}">
           <span contenteditable="true">${nome}</span>
           <a class="delete-button">×</a>
@@ -380,7 +381,8 @@ function renderizarFluxos(fluxos) {
   // Adicionar event listeners para os botões de deletar
   document.querySelectorAll('.delete-button').forEach(button => {
       button.addEventListener('click', function() {
-          this.closest('.task-item').remove();
+          const idFluxo = parseInt(this.closest('.task-item').dataset.id);
+          removerFluxo(idFluxo);
       });
   });
 
@@ -389,22 +391,21 @@ function renderizarFluxos(fluxos) {
 };
 
 function adicionarNovoFluxo() {
-  const taskList = document.getElementById('task-list');
-  const novoId = Date.now(); // Usar timestamp como ID temporário
-  const novoFluxo = document.createElement('div');
-  novoFluxo.className = 'task-item';
-  novoFluxo.dataset.id = novoId;
-  novoFluxo.innerHTML = `
-      <span contenteditable="true">Novo Fluxo</span>
-      <a class="delete-button">×</a>
-  `;
+  const novoId = todosOsFluxos.length > 0 ? Math.max(...todosOsFluxos.map(f => f.id_fluxo)) + 1 : 1;
+  const novaPosicao = todosOsFluxos.length > 0 ? Math.max(...todosOsFluxos.map(f => f.posicao)) + 1 : 1;
+  const novoFluxo = {
+      id_fluxo: novoId,
+      nome: 'Novo Fluxo',
+      posicao: novaPosicao
+  };
 
-  taskList.insertBefore(novoFluxo, taskList.lastElementChild);
+  todosOsFluxos.push(novoFluxo);
+  renderizarFluxos();
+};
 
-  // Adicionar event listener para o novo botão de deletar
-  novoFluxo.querySelector('.delete-button').addEventListener('click', function() {
-      novoFluxo.remove();
-  });
+function removerFluxo(idFluxo) {
+  todosOsFluxos = todosOsFluxos.filter(fluxo => fluxo.id_fluxo !== idFluxo);
+  renderizarFluxos();
 };
 
 function ativarUsuarios() {
