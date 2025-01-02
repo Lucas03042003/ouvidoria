@@ -125,7 +125,7 @@ function renderizarCartoes(cartoes) {
       });
 
       cardElement.addEventListener('dblclick', () => {
-          expandirCard(cartao.Cliente, cartao.Data_comentario, cartao.tag_titulo);
+          expandirCard(cartao.Cliente, cartao.Data_comentario, cartao.tag_titulo, cartao.admin_nome, cartao.cor_tag, cartao.cor_texto_tag, cartao.Comentario);
       });
   });
 
@@ -180,7 +180,7 @@ function fecharCard() {
     }
   }
   
-function expandirCard(cliente, data, tag) {
+function expandirCard(cliente, data, tag, responsavel, cor_tag, cor_texto_tag, comentario) {
     const elemento = document.querySelector('.container');
     elemento.style.filter = 'blur(5px)';
     
@@ -210,11 +210,23 @@ function expandirCard(cliente, data, tag) {
     configPanel.style.borderRadius = '5px';
     configPanel.style.zIndex = '1001';
     configPanel.innerHTML = `
-      <main class="main-config" id="main_config">
+      <main class="main-info" id="main_config">
         <div class="content-config">
           <a class="config-exit" id="closeConfig">x</a>
         </div>
-        <h2>Cartão do paciente</h2>
+        <h2>Cartão do Comentário</h2>
+        <div container-informacoes>
+          <div class="informacoes">
+            <a>Tag: <a class="badge" style="background-color: ${cor_tag}; color: ${cor_texto_tag};">${tag}</a></a>
+            <p>Cliente: ${cliente}</p>
+            <p>Data do comentário: ${data}</p>
+            <p>Responsável: ${responsavel}</p>
+          </div>
+          <div class="informacoes">
+            <p>Comentário:</p>
+            <p>${comentario}</p>
+          </div>
+        </div>
         <div class="action-buttons">
           <a class="btn btn-check" href="#" title="Finalizar">✔</a>
           <a class="btn btn-cancel" onclick="confirmarCancelar()" href="#" title="Excluir">✖</a>

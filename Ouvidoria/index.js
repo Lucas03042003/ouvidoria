@@ -353,7 +353,7 @@ function ativarSistema() {
       </div>
       <div class="toggle-container" id="toggle-container">
           <div class="toggle-switch" id="toggleSwitch"></div>
-          <span class="text_config_sis">Deletar somente colunas vazias</span>
+          <span class="text_config_sis">Permitir que atendentes excluam cartões</span>
       </div>
   `;
 

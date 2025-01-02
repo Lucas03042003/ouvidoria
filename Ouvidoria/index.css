@@ -602,3 +602,40 @@ color: #e0e0e0;
   border: none; /* Remove a borda interna no Firefox */
   border-radius: 50%;
 }
+
+.informacoes {
+  flex: 1;
+  flex-direction: column;
+  margin-top: 30px;
+}
+
+.informacoes p{
+  margin-top: 10px;
+}
+
+.main-info {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  max-width: 80%;
+  direction: rtl; /* Inverte a direção do conteúdo */
+}
+
+.main-info > * {
+  direction: ltr; /* Restaura a direção normal para o conteúdo interno */
+}
+
+/* Estilos para navegadores baseados em WebKit (Chrome, Safari, etc.) */
+.main-info::-webkit-scrollbar {
+  width: 8px; /* Ajuste a largura conforme necessário */
+}
+
+.main-info::-webkit-scrollbar-thumb {
+  background-color: #f4f4f4; /* Cor da barra de rolagem */
+  border-radius: 4px;
+}
+
+.main-info::-webkit-scrollbar-track {
+  background-color: #ccc; /* Cor do fundo da barra de rolagem */
+}
