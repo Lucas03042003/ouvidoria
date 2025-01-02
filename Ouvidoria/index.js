@@ -335,7 +335,7 @@ function ativarSistema() {
       <div class="content-config">
           <a class="config-exit" id="closeConfig">x</a>
       </div>
-      <div class="toggle-container">
+      <div class="toggle-container" id="toggle-container">
           <div class="toggle-switch" id="toggleSwitch"></div>
           <span class="text_config_sis">Deletar somente cartões vazios</span>
       </div>
@@ -344,21 +344,22 @@ function ativarSistema() {
   fetchSistemaConfig();
 
   document.getElementById('closeConfig').addEventListener('click', desativarConfig);
+  document.getElementById('toggle-container').addEventListener('click', salvarConfiguracao);
 };
 
 async function fetchSistemaConfig() {
   try {
-      const response = await fetch('http://127.0.0.1:5000/ativar-sistema', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-      });
+    const response = await fetch('http://127.0.0.1:5000/ativar-sistema', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const data = await response.json();
-      configurarToggleSwitch(data[0].config1);
+    const data = await response.json();
+    configurarToggleSwitch(data[0].config1);
   } catch (error) {
-      console.error('Erro ao ativar sistema:', error);
+    console.error('Erro ao ativar sistema:', error);
   };
 };
 
@@ -366,17 +367,39 @@ function configurarToggleSwitch(isActive) {
   const toggleSwitch = document.getElementById('toggleSwitch');
   
   if (isActive) {
-      toggleSwitch.classList.add('active');
+    toggleSwitch.classList.add('active');
   } else {
-      toggleSwitch.classList.remove('active');
+    toggleSwitch.classList.remove('active');
   }
 
   // Adiciona um event listener apenas para alternar visualmente o switch
   toggleSwitch.addEventListener('click', function() {
-      this.classList.toggle('active');
-      console.log('Estado do toggle alterado (apenas visual)');
+    this.classList.toggle('active');
+    console.log('Estado do toggle alterado (apenas visual)');
   });
-}
+};
+
+async function salvarConfiguracao() {
+  const toggleSwitch = document.getElementById('toggleSwitch');
+  const isActive = toggleSwitch.classList.contains('active');
+
+  try {
+    const response = await fetch('http://127.0.0.1:5000/atualizar-sistema', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ config1: isActive }) // Envia o estado atual do switch
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data = await response.json();
+    console.log('Sistema atualizado:', data);
+    
+  } catch (error) {
+    console.error('Erro ao atualizar sistema:', error);
+    alert('Erro ao salvar a configuração. Por favor, tente novamente.');
+  };
+};
 
 // Função para ativar o botão "Fluxo"
 function ativarFluxo() {

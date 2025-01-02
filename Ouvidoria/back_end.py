@@ -1,4 +1,5 @@
 import mysql.connector
+import logging
 from flask import Flask, jsonify, request
 import flask_cors
 
@@ -221,6 +222,48 @@ def salvar_usuarios():
 
     finally:
         # Fechar cursor e conexão, independentemente do resultado
+        if cursor:
+            cursor.close()
+        if cnx:
+            cnx.close()
+
+@app.route('/atualizar-sistema', methods=['POST'])
+def atualizar_sistema():
+    cnx = None
+    cursor = None
+    try:
+        novo_estado = request.json.get('config1')
+        if novo_estado is None:
+            return jsonify({"error": "config1 não fornecido no corpo da requisição"}), 400
+
+        cnx = get_db_connection()
+        cursor = cnx.cursor()
+
+        # Iniciar uma transação
+        cnx.start_transaction()
+
+        # Atualizar o sistema com o valor recebido
+        update_query = "UPDATE Config SET config1 = %s"
+        cursor.execute(update_query, (novo_estado,))
+
+        # Se chegou até aqui sem erros, commit da transação
+        cnx.commit()
+        
+        return jsonify({"message": "Configurações atualizado com sucesso!", "novo_estado": novo_estado}), 200
+
+    except mysql.connector.Error as e:
+        logging.error(f"Database error: {e}")
+        if cnx:
+            cnx.rollback()
+        return jsonify({"error": f"Erro de banco de dados: {str(e)}"}), 500
+
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
+        if cnx:
+            cnx.rollback()
+        return jsonify({"error": f"Erro inesperado: {str(e)}"}), 500
+
+    finally:
         if cursor:
             cursor.close()
         if cnx:
