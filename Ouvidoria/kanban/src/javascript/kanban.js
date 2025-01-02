@@ -1,7 +1,7 @@
-let todosOsKanbans = [];
+window.todosOsKanbans = [];
 window.todosOsCartoes = [];
  
-async function fetchKanban() {
+async function fetchKanban(recarregar) {
   try {
       const response = await fetch('http://127.0.0.1:5000/ativar-fluxo', {
           method: 'POST',
@@ -10,7 +10,7 @@ async function fetchKanban() {
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      todosOsKanbans = await response.json();
+      window.todosOsKanbans = await response.json();
       renderizarKanban();
   } catch (error) {
       console.error('Erro ao ativar fluxos:', error);
