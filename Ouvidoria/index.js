@@ -223,23 +223,37 @@ function renderizarTags() {
   const tagsList = document.getElementById('tags-list');
 
   const tagsHTML = todasAsTags.map(({ cor_tag, cor_texto, id_tag, titulo }) => `
-      <div class="tag-item">
+      <div class="tag-item" data-id="${id_tag}">
           <span contenteditable="true" class="tag-btn" id="btn-cor${id_tag}" style="background-color: ${cor_tag}; color: ${cor_texto};">${titulo}</span>
           <div class="tag-details">
               <input type="color" id="colorPickerTag${id_tag}" class="color-input" value="${cor_tag}"> Cor da tag
               <input type="color" id="colorPickerTxt${id_tag}" class="color-input" value="${cor_texto}"> Cor do texto
+              <a class="delete-tag">x</a>
           </div>
       </div>
   `).join('');
 
   tagsList.innerHTML = tagsHTML;
 
-  // Adicionar event listeners para os color pickers
+  // Adicionar event listeners para os color pickers e botões de exclusão
   todasAsTags.forEach(({ id_tag }) => {
       atualizarCores(id_tag);
+      adicionarEventoExclusao(id_tag);
   });
 
   atualizarTituloTags();
+};
+
+function adicionarEventoExclusao(id_tag) {
+  const tagItem = document.querySelector(`.tag-item[data-id="${id_tag}"]`);
+  const deleteButton = tagItem.querySelector('.delete-tag');
+  
+  deleteButton.addEventListener('click', function() {
+    if (confirm('Tem certeza que deseja excluir esta tag?')) {
+      todasAsTags = todasAsTags.filter(tag => tag.id_tag !== id_tag);
+      renderizarTags();
+    };
+  });
 };
 
 function atualizarCores(id_tag) {
