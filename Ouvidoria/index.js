@@ -115,6 +115,8 @@ function abrirHome() {
     let centro = document.getElementById("content-kanban");
     centro.innerHTML =``;
     $('#content-kanban').load('kanban.html');
+    fetchKanban();
+    configKanban();
 
     document.getElementById('btn-finalizados').addEventListener('click', abrirFinalizados);
     document.getElementById('btn-excluidos').addEventListener('click', abrirExluidos);
