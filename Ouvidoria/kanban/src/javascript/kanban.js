@@ -64,101 +64,114 @@ async function fetchCartoes(renderizar) {
   
 // Função para renderizar os cartões 
 function renderizarCartoes(cartoes) {
-    if (!Array.isArray(cartoes) || cartoes.length === 0) {
+  if (!Array.isArray(cartoes) || cartoes.length === 0) {
       console.log('Nenhum cartão para renderizar ou dados inválidos.');
       return;
-    }
-  
-    cartoes.forEach(cartao => {
+  }
+
+  // Limpar todas as colunas antes de renderizar
+  document.querySelectorAll('.kanban-cards').forEach(column => {
+      column.innerHTML = '';
+  });
+
+  cartoes.forEach(cartao => {
       if (!cartao || typeof cartao !== 'object') {
-        console.error('Cartão inválido:', cartao);
-        return;
+          console.error('Cartão inválido:', cartao);
+          return;
       }
-  
+
       const colunaKanban = document.querySelector(`.kanban-column[data-id="${cartao.id_fluxo}"]`);
       if (!colunaKanban) {
-        console.error(`Coluna não encontrada para o fluxo: ${cartao.nome_fluxo || 'Desconhecido'}`);
-        return;
+          console.error(`Coluna não encontrada para o fluxo: ${cartao.nome_fluxo || 'Desconhecido'}`);
+          return;
       }
-  
+
       let cardsContainer = colunaKanban.querySelector('.kanban-cards');
       if (!cardsContainer) {
-        cardsContainer = document.createElement('div');
-        cardsContainer.className = "kanban-cards";
-        colunaKanban.appendChild(cardsContainer);
+          cardsContainer = document.createElement('div');
+          cardsContainer.className = "kanban-cards";
+          colunaKanban.appendChild(cardsContainer);
       }
-  
+
       const cardElement = document.createElement('div');
       cardElement.className = 'kanban-card';
       cardElement.draggable = true;
       cardElement.dataset.id = cartao.ID_Cartao;
-  
+
       cardElement.innerHTML = `
-        <div class="badge" style="background-color: ${cartao.cor_tag || '#ccc'}; color: ${cartao.cor_texto_tag || '#000'};">
-          <span>${cartao.tag_titulo || 'Sem Tag'}</span>
-        </div>
-        <div class="card-text">
-          <a id="client">Cliente: ${cartao.Cliente || 'Sem Cliente'}</a>
-          <a id="date">Data: ${cartao.Data_comentario || 'Sem Data'}</a>
-        </div>
-        <div class="card-infos">
-          <div class="card-icons">
+          <div class="badge" style="background-color: ${cartao.cor_tag || '#ccc'}; color: ${cartao.cor_texto_tag || '#000'};">
+              <span>${cartao.tag_titulo || 'Sem Tag'}</span>
           </div>
-        </div>
+          <div class="card-text">
+              <a id="client">Cliente: ${cartao.Cliente || 'Sem Cliente'}</a>
+              <a id="date">Data: ${cartao.Data_comentario || 'Sem Data'}</a>
+          </div>
+          <div class="card-infos">
+              <div class="card-icons">
+              </div>
+          </div>
       `;
-  
+
       cardsContainer.appendChild(cardElement);
-  
+
       // Adicionar eventos ao cartão
       cardElement.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', cartao.ID_Cartao);
-        e.currentTarget.classList.add('dragging');
+          e.dataTransfer.setData('text/plain', cartao.ID_Cartao);
+          e.currentTarget.classList.add('dragging');
       });
-  
+
       cardElement.addEventListener('dragend', (e) => {
-        e.currentTarget.classList.remove('dragging');
+          e.currentTarget.classList.remove('dragging');
       });
-  
+
       cardElement.addEventListener('dblclick', () => {
-        expandirCard(cartao.Cliente, cartao.Data_comentario, cartao.tag_titulo);
+          expandirCard(cartao.Cliente, cartao.Data_comentario, cartao.tag_titulo);
       });
-    });
-  
-    // Adicionar eventos às colunas
-    document.querySelectorAll('.kanban-cards').forEach(column => {
+  });
+
+  // Adicionar eventos às colunas
+  document.querySelectorAll('.kanban-cards').forEach(column => {
       column.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.currentTarget.classList.add('cards-hover');
+          e.preventDefault();
+          e.currentTarget.classList.add('cards-hover');
       });
-  
+
       column.addEventListener('dragleave', (e) => {
-        e.currentTarget.classList.remove('cards-hover');
+          e.currentTarget.classList.remove('cards-hover');
       });
-  
+
       column.addEventListener('drop', (e) => {
-        e.currentTarget.classList.remove('cards-hover');
-        const dragCard = document.querySelector('.kanban-card.dragging');
-        if (dragCard) {
-          e.currentTarget.appendChild(dragCard);
-        }
+          e.preventDefault();
+          e.currentTarget.classList.remove('cards-hover');
+          const dragCard = document.querySelector('.kanban-card.dragging');
+          if (dragCard) {
+              const cardId = dragCard.getAttribute('data-id');
+              const newFluxoId = column.closest('.kanban-column').getAttribute('data-id');
+
+              // Move o cartão visualmente
+              e.currentTarget.appendChild(dragCard);
+
+              // Atualiza o banco de dados
+              atualizarEtapaCartao(cardId, newFluxoId);
+          }
       });
-    });
-  }
+  });
+};
   
-  function fecharCard() {
+function fecharCard() {
     const elemento = document.querySelector('.container');
     elemento.style.filter = 'none';
   
     const overlay = document.getElementById('overlay');
     if (overlay) {
       overlay.remove();
-    }
+    };
   
     const configPanel = document.getElementById('configPanel');
     if (configPanel) {
       configPanel.remove();
-    }
-  }
+    };
+};
   
   function confirmarCancelar() {
     let confirmar = confirm("Você irá deletar esse cartão. Deseja mesmo continuar?");
@@ -167,7 +180,7 @@ function renderizarCartoes(cartoes) {
     }
   }
   
-  function expandirCard(cliente, data, tag) {
+function expandirCard(cliente, data, tag) {
     const elemento = document.querySelector('.container');
     elemento.style.filter = 'blur(5px)';
     
@@ -212,55 +225,37 @@ function renderizarCartoes(cartoes) {
     document.body.appendChild(configPanel);
     
     document.getElementById('closeConfig').addEventListener('click', fecharCard);
-  }
+};
 
-function configKanban() {
-// Seleciona todos os elementos com a classe '.kanban-card' e adiciona eventos a cada um deles
-document.querySelectorAll('.kanban-card').forEach(card => {
-  // Evento disparado quando começa a arrastar um card
-  card.addEventListener('dragstart', e => {
-      // Adiciona a classe 'dragging' ao card que está sendo arrastado
-      e.currentTarget.classList.add('dragging');
+function atualizarEtapaCartao(cardId, newFluxoId) {
+  fetch('http://127.0.0.1:5000/api/atualizar-etapa-cartao', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+          cardId: cardId,
+          newFluxoId: newFluxoId
+      })
+  })
+  .then(response => {
+      if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+  })
+  .then(data => {
+      console.log('Etapa do cartão atualizada com sucesso:', data);
+      // Atualiza o objeto local do cartão
+      const cartao = window.todosOsCartoes.find(c => c.ID_Cartao == cardId);
+      if (cartao) {
+          cartao.id_fluxo = newFluxoId;
+      }
+  })
+  .catch(error => {
+      console.error('Erro ao atualizar etapa do cartão:', error);
+      // Aqui você pode adicionar lógica para reverter a mudança visual
   });
-
-  // Evento disparado quando termina de arrastar o card
-  card.addEventListener('dragend', e => {
-      // Remove a classe 'dragging' quando o card é solto
-      e.currentTarget.classList.remove('dragging');
-  });
-
-  card.addEventListener('dblclick', expandirCard);
-});
-
-// Seleciona todos os elementos com a classe '.kanban-cards' (as colunas) e adiciona eventos a cada um deles
-document.querySelectorAll('.kanban-cards').forEach(column => {
-  // Evento disparado quando um card arrastado passa sobre uma coluna (drag over)
-  column.addEventListener('dragover', e => {
-      // Previne o comportamento padrão para permitir o "drop" (soltar) do card
-      e.preventDefault();
-      // Adiciona a classe 'cards-hover'
-      e.currentTarget.classList.add('cards-hover');
-  });
-
-  // Evento disparado quando o card sai da área da coluna (quando o card é arrastado para fora)
-  column.addEventListener('dragleave', e => {
-      // Remove a classe 'cards-hover' quando o card deixa de estar sobre a coluna
-      e.currentTarget.classList.remove('cards-hover');
-  });
-
-  // Evento disparado quando o card é solto (drop) dentro da coluna
-  column.addEventListener('drop', e => {
-      // Remove a classe 'cards-hover', já que o card foi solto
-      e.currentTarget.classList.remove('cards-hover');
-
-      // Seleciona o card que está sendo arrastado (que tem a classe 'dragging')
-      const dragCard = document.querySelector('.kanban-card.dragging');
-      
-      // Anexa (move) o card arrastado para a coluna onde foi solto
-      e.currentTarget.appendChild(dragCard);
-  });
-});
 };
 
 fetchKanban();
-configKanban();
