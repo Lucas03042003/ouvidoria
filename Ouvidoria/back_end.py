@@ -60,6 +60,46 @@ def ativar_sistema():
     cnx.close()
     return jsonify(resultado), 200
 
+@app.route('/coletar-cartoes', methods=['POST'])
+def coletar_cartoes():
+    cnx = None
+    cursor = None
+    try:
+        cnx = get_db_connection()
+        cursor = cnx.cursor(dictionary=True)
+
+        query = """
+        SELECT c.ID_Cartao, c.Cliente, c.Data_comentario, c.Comentario, 
+               c.Etapa, c.Tag, c.Administrador, f.nome as nome_fluxo, f.id_fluxo, t.titulo as tag_titulo, 
+               t.cor_tag, t.cor_texto as cor_texto_tag, u.email as admin_nome
+        FROM Cartoes c
+        LEFT JOIN Fluxo f ON c.Etapa = f.id_fluxo
+        LEFT JOIN Tags t ON c.Tag = t.id_tag
+        LEFT JOIN Usuarios u ON c.Administrador = u.id_user
+        """
+        cursor.execute(query)
+        cartoes = cursor.fetchall()
+
+        # Converter as datas para string
+        for cartao in cartoes:
+            cartao['Data_comentario'] = cartao['Data_comentario'].strftime('%Y-%m-%d')
+
+        return jsonify(cartoes), 200
+
+    except mysql.connector.Error as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": f"Erro de banco de dados: {str(e)}"}), 500
+
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return jsonify({"error": f"Erro inesperado: {str(e)}"}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if cnx:
+            cnx.close()
+
 @app.route('/salvar-fluxos', methods=['POST'])
 def salvar_fluxos():
     cnx = None
@@ -67,22 +107,35 @@ def salvar_fluxos():
     try:
         novos_fluxos = request.json
         cnx = get_db_connection()
-        cursor = cnx.cursor()
+        cursor = cnx.cursor(dictionary=True)
 
         # Iniciar uma transação
         cnx.start_transaction()
 
-        # Armazenar os fluxos antigos antes de deletá-los
-        cursor.execute("SELECT * FROM Fluxo")
-        fluxos_antigos = cursor.fetchall()
+        # Buscar fluxos existentes
+        cursor.execute("SELECT id_fluxo, nome FROM Fluxo")
+        fluxos_existentes = {fluxo['id_fluxo']: fluxo['nome'] for fluxo in cursor.fetchall()}
 
-        # Deletar todos os fluxos existentes
-        cursor.execute("DELETE FROM Fluxo")
-
-        # Inserir os novos fluxos
+        # Atualizar fluxos existentes e inserir novos
+        update_query = "UPDATE Fluxo SET nome = %s, posicao = %s WHERE id_fluxo = %s"
         insert_query = "INSERT INTO Fluxo (id_fluxo, nome, posicao) VALUES (%s, %s, %s)"
+        
         for fluxo in novos_fluxos:
-            cursor.execute(insert_query, (fluxo['id_fluxo'], fluxo['nome'], fluxo['posicao']))
+            if fluxo['id_fluxo'] in fluxos_existentes:
+                # Atualizar fluxo existente
+                cursor.execute(update_query, (fluxo['nome'], fluxo['posicao'], fluxo['id_fluxo']))
+            else:
+                # Inserir novo fluxo
+                cursor.execute(insert_query, (fluxo['id_fluxo'], fluxo['nome'], fluxo['posicao']))
+
+        # Remover fluxos que não estão mais presentes
+        fluxos_atuais = set(fluxo['id_fluxo'] for fluxo in novos_fluxos)
+        fluxos_para_remover = set(fluxos_existentes.keys()) - fluxos_atuais
+        
+        if fluxos_para_remover:
+            placeholders = ', '.join(['%s'] * len(fluxos_para_remover))
+            delete_query = f"DELETE FROM Fluxo WHERE id_fluxo IN ({placeholders})"
+            cursor.execute(delete_query, tuple(fluxos_para_remover))
 
         # Se chegou até aqui sem erros, commit da transação
         cnx.commit()
@@ -93,15 +146,6 @@ def salvar_fluxos():
         # Se ocorrer qualquer erro, fazer rollback
         if cnx:
             cnx.rollback()
-            
-            # Tentar restaurar os fluxos antigos
-            try:
-                for fluxo in fluxos_antigos:
-                    cursor.execute(insert_query, fluxo)
-                cnx.commit()
-            except:
-                # Se falhar ao restaurar, pelo menos o banco estará vazio
-                cnx.rollback()
         
         return jsonify({"error": str(e)}), 500
 
@@ -119,51 +163,55 @@ def salvar_tags():
     try:
         novas_tags = request.json
         cnx = get_db_connection()
-        cursor = cnx.cursor()
+        cursor = cnx.cursor(dictionary=True)
 
         # Iniciar uma transação
         cnx.start_transaction()
 
-        # Armazenar as tags antigas antes de deletá-las
-        cursor.execute("SELECT * FROM Tags")
-        tags_antigas = cursor.fetchall()
+        # Buscar tags existentes
+        cursor.execute("SELECT id_tag, titulo FROM Tags")
+        tags_existentes = {tag['id_tag']: tag['titulo'] for tag in cursor.fetchall()}
 
-        # Deletar todas as tags existentes
-        cursor.execute("DELETE FROM Tags")
-
-        # Inserir as novas tags
+        # Atualizar tags existentes e inserir novas
+        update_query = "UPDATE Tags SET titulo = %s, cor_tag = %s, cor_texto = %s WHERE id_tag = %s"
         insert_query = "INSERT INTO Tags (id_tag, titulo, cor_tag, cor_texto) VALUES (%s, %s, %s, %s)"
+        
         for tag in novas_tags:
-            cursor.execute(insert_query, (
-                tag['id_tag'],
-                tag['titulo'],
-                tag['cor_tag'],
-                tag['cor_texto']
-            ))
+            if tag['id_tag'] in tags_existentes:
+                cursor.execute(update_query, (tag['titulo'], tag['cor_tag'], tag['cor_texto'], tag['id_tag']))
+            else:
+                cursor.execute(insert_query, (tag['id_tag'], tag['titulo'], tag['cor_tag'], tag['cor_texto']))
 
-        # Se chegou até aqui sem erros, commit da transação
+        # Remover tags que não estão mais presentes
+        tags_atuais = set(tag['id_tag'] for tag in novas_tags)
+        tags_para_remover = set(tags_existentes.keys()) - tags_atuais
+        
+        if tags_para_remover:
+            # Verificar se alguma tag a ser removida está em uso
+            placeholders = ', '.join(['%s'] * len(tags_para_remover))
+            check_query = f"SELECT Tag FROM Cartoes WHERE Tag IN ({placeholders})"
+            cursor.execute(check_query, tuple(tags_para_remover))
+            tags_em_uso = set(row['Tag'] for row in cursor.fetchall())
+            
+            # Remover apenas as tags que não estão em uso
+            tags_para_remover = tags_para_remover - tags_em_uso
+            
+            if tags_para_remover:
+                placeholders = ', '.join(['%s'] * len(tags_para_remover))
+                delete_query = f"DELETE FROM Tags WHERE id_tag IN ({placeholders})"
+                cursor.execute(delete_query, tuple(tags_para_remover))
+
+        # Commit da transação
         cnx.commit()
         
         return jsonify({"message": "Tags atualizadas com sucesso!"}), 200
 
     except Exception as e:
-        # Se ocorrer qualquer erro, fazer rollback
         if cnx:
             cnx.rollback()
-            
-            # Tentar restaurar as tags antigas
-            try:
-                for tag in tags_antigas:
-                    cursor.execute(insert_query, tag)
-                cnx.commit()
-            except:
-                # Se falhar ao restaurar, pelo menos o banco estará vazio
-                cnx.rollback()
-        
         return jsonify({"error": str(e)}), 500
 
     finally:
-        # Fechar cursor e conexão, independentemente do resultado
         if cursor:
             cursor.close()
         if cnx:

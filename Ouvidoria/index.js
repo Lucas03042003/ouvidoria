@@ -249,9 +249,24 @@ function adicionarEventoExclusao(id_tag) {
   const deleteButton = tagItem.querySelector('.delete-tag');
   
   deleteButton.addEventListener('click', function() {
-    if (confirm('Tem certeza que deseja excluir esta tag?')) {
-      todasAsTags = todasAsTags.filter(tag => tag.id_tag !== id_tag);
-      renderizarTags();
+    console.log('Tentando excluir tag com id:', id_tag);
+    console.log('todosOsCartoes:', todosOsCartoes);
+
+    const cartoesComTag = todosOsCartoes.filter(cartao => {
+      console.log('Verificando cartão:', cartao);
+      return cartao.Tag == id_tag; 
+    });
+    
+    console.log('Cartões com a tag:', cartoesComTag);
+
+    if (cartoesComTag.length > 0) {
+      alert(`Não é possível excluir esta tag. Ela está sendo usada em ${cartoesComTag.length} cartão(ões).`);
+      console.log('Cartões usando esta tag:', cartoesComTag);
+    } else {
+      if (confirm('Tem certeza que deseja excluir esta tag?')) {
+        todasAsTags = todasAsTags.filter(tag => tag.id_tag !== id_tag);
+        renderizarTags();
+      };
     };
   });
 };
@@ -489,8 +504,19 @@ function adicionarNovoFluxo() {
 };
 
 function removerFluxo(idFluxo) {
-  todosOsFluxos = todosOsFluxos.filter(fluxo => fluxo.id_fluxo !== idFluxo);
-  renderizarFluxos();
+  const cartoesEmFluxo = todosOsCartoes.filter(cartao => {
+    console.log('Verificando cartão:', cartao);
+    return cartao.id_fluxo == idFluxo; 
+  });
+
+  if (cartoesEmFluxo.length > 0) {
+    alert(`Não é possível excluir esta tag. Ela está possui ${cartoesEmFluxo.length} cartão(ões).`);
+  } else {
+    if (confirm('Tem certeza que deseja excluir essa etapa?')) {
+      todosOsFluxos = todosOsFluxos.filter(fluxo => fluxo.id_fluxo !== idFluxo);
+      renderizarFluxos();
+    };
+  };
 };
 
 function salvarTudo() {
@@ -512,6 +538,8 @@ function salvarTudo() {
   enviarParaServidorFluxo(todosOsFluxos);
 
   alert("Alterações salvas com sucesso!");
+
+  fetchKanban();
 
 };
 
@@ -591,7 +619,9 @@ function renderizarUsuarios() {
 function criarElementoUsuario(usuario, roles) {
   const userItem = document.createElement('div');
   userItem.className = 'user-item';
-  userItem.dataset.id = usuario.id_user;
+
+  // Verifica se o usuário é administrador de algum cartão
+  const isAdminDeAlgumCartao = window.todosOsCartoes.some(cartao => cartao.Administrador == usuario.id_user);
 
   userItem.innerHTML = `
       <div class="user-info" id="${usuario.id_user}">
@@ -607,14 +637,9 @@ function criarElementoUsuario(usuario, roles) {
                   ${role}
               </option>
           `).join('')}
-          <option value="excluir">excluir</option>
+          ${!isAdminDeAlgumCartao ? '<option value="excluir">excluir</option>' : ''}
       </select>
   `;
-
-  // Adicionar event listeners para atualizar os dados do usuário
-  userItem.querySelector('.user-email').addEventListener('input', () => atualizarUsuario(userItem));
-  userItem.querySelector('.key-user').addEventListener('input', () => atualizarUsuario(userItem));
-  userItem.querySelector('.user-role').addEventListener('change', () => atualizarUsuario(userItem));
 
   return userItem;
 };
