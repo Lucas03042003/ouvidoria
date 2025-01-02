@@ -198,13 +198,13 @@ function ativarTags() {
       </div>
   `;
 
-  fetchTags();
+  fetchTags(true);
 
   document.getElementById('closeConfig').addEventListener('click', desativarConfig);
   document.querySelector('.add-task').addEventListener('click', adicionarNovaTag);
 };
 
-async function fetchTags() {
+async function fetchTags(renderizar) {
   try {
       const response = await fetch('http://127.0.0.1:5000/ativar-tag', {
           method: 'POST',
@@ -214,7 +214,9 @@ async function fetchTags() {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       todasAsTags = await response.json();
-      renderizarTags();
+      if (renderizar) {  
+        renderizarTags();
+      };
   } catch (error) {
       console.error('Erro ao ativar tags:', error);
   };
@@ -571,12 +573,12 @@ function ativarUsuarios() {
       <div class="list-users" id="list-users"></div>
   `;
 
-  fetchUsuarios();
+  fetchUsuarios(true);
 
   document.getElementById('closeConfig').addEventListener('click', desativarConfig);
 };
 
-async function fetchUsuarios() {
+async function fetchUsuarios(renderizar) {
   try {
       const response = await fetch('http://127.0.0.1:5000/ativar-usuarios', {
           method: 'POST',
@@ -586,7 +588,9 @@ async function fetchUsuarios() {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       todosOsUsuarios = await response.json();
-      renderizarUsuarios();
+      if (renderizar) {    
+        renderizarUsuarios();
+      };
   } catch (error) {
       console.error('Erro ao ativar usuários:', error);
   };

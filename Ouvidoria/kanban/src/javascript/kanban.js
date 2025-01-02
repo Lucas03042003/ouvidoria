@@ -173,70 +173,106 @@ function fecharCard() {
     };
 };
   
-  function confirmarCancelar() {
+function confirmarCancelar() {
     let confirmar = confirm("Você irá deletar esse cartão. Deseja mesmo continuar?");
     if (confirmar) {
       fecharCard();
-    }
-  }
+    };
+};
+
+async function expandirCard(cliente, data, tag, responsavel, cor_tag, cor_texto_tag, comentario) {
+  const elemento = document.querySelector('.container');
+  elemento.style.filter = 'blur(5px)';
   
-function expandirCard(cliente, data, tag, responsavel, cor_tag, cor_texto_tag, comentario) {
-    const elemento = document.querySelector('.container');
-    elemento.style.filter = 'blur(5px)';
-    
-    const overlay = document.createElement('div');
-    overlay.id = 'overlay';
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-    overlay.style.zIndex = '1000';
-    
-    document.body.appendChild(overlay);
-    
-    const configPanel = document.createElement('div');
-    configPanel.className = 'body-config';
-    configPanel.id = 'configPanel';
-    configPanel.style.position = 'fixed';
-    configPanel.style.top = '50%';
-    configPanel.style.left = '50%';
-    configPanel.style.height = '50%';
-    configPanel.style.width = '40%';
-    configPanel.style.transform = 'translate(-50%, -50%)';
-    configPanel.style.backgroundColor = '#333';
-    configPanel.style.color = '#807E7E';
-    configPanel.style.borderRadius = '5px';
-    configPanel.style.zIndex = '1001';
-    configPanel.innerHTML = `
-      <main class="main-info" id="main_config">
-        <div class="content-config">
-          <a class="config-exit" id="closeConfig">x</a>
-        </div>
-        <h2>Cartão do Comentário</h2>
-        <div container-informacoes>
-          <div class="informacoes">
-            <a>Tag: <a class="badge" style="background-color: ${cor_tag}; color: ${cor_texto_tag};">${tag}</a></a>
-            <p>Cliente: ${cliente}</p>
-            <p>Data do comentário: ${data}</p>
-            <p>Responsável: ${responsavel}</p>
-          </div>
-          <div class="informacoes">
-            <p>Comentário:</p>
-            <p>${comentario}</p>
-          </div>
-        </div>
-        <div class="action-buttons">
-          <a class="btn btn-check" href="#" title="Finalizar">✔</a>
-          <a class="btn btn-cancel" onclick="confirmarCancelar()" href="#" title="Excluir">✖</a>
-        </div>
-      </main>
-    `;
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay';
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+  overlay.style.zIndex = '1000';
   
-    document.body.appendChild(configPanel);
-    
-    document.getElementById('closeConfig').addEventListener('click', fecharCard);
+  document.body.appendChild(overlay);
+  
+  const configPanel = document.createElement('div');
+  configPanel.className = 'body-config';
+  configPanel.id = 'configPanel';
+  configPanel.style.position = 'fixed';
+  configPanel.style.top = '50%';
+  configPanel.style.left = '50%';
+  configPanel.style.height = '50%';
+  configPanel.style.width = '40%';
+  configPanel.style.transform = 'translate(-50%, -50%)';
+  configPanel.style.backgroundColor = '#333';
+  configPanel.style.color = '#807E7E';
+  configPanel.style.borderRadius = '5px';
+  configPanel.style.zIndex = '1001';
+
+  // Aguardar a conclusão de fetchUsuariosExpansao
+  await fetchUsuarios(false);
+  console.log(todosOsUsuarios);
+
+  await fetchTags(false);
+  console.log(todasAsTags);
+
+  // Criar o select de responsáveis
+  const responsaveisOptions = todosOsUsuarios ? todosOsUsuarios.map(user => 
+      `<option value="${user.id_user}" ${user.email === responsavel ? 'selected' : ''}>${user.email}</option>`
+  ).join('') : '';
+
+  const tagsOptions = todasAsTags ? todasAsTags.map(tagItem => 
+    `<option value="${tagItem.id_tag}" 
+             style="background-color: ${tagItem.cor_tag}; color: ${tagItem.cor_texto}"
+             ${tagItem.titulo === tag ? 'selected' : ''}>
+        ${tagItem.titulo}
+     </option>`
+  ).join('') : '';
+
+  configPanel.innerHTML = `
+    <main class="main-info" id="main_config">
+      <div class="content-config">
+        <a class="config-exit" id="closeConfig">x</a>
+      </div>
+      <h2>Cartão do Comentário</h2>
+      <div class="container-informacoes">
+        <div class="informacoes">
+          <a>
+          Tag:
+          <select id="tag-select" class="badge" style="background-color: ${cor_tag}; color: ${cor_texto_tag};">
+            ${tagsOptions}
+          </select>
+          </a>
+          <p>Cliente: ${cliente}</p>
+          <p>Data do comentário: ${data}</p>
+          <label for="responsavel-select">Responsável:</label>
+          <select id="responsavel-select" style="background-color: transparent; color: inherit; border: 1px solid #807E7E;">
+            ${responsaveisOptions}
+          </select>
+        </div>
+        <div class="informacoes">
+          <p>Comentário:</p>
+          <p>${comentario}</p>
+        </div>
+      </div>
+      <div class="action-buttons">
+        <a class="btn btn-check" href="#" title="Finalizar">✔</a>
+        <a class="btn btn-cancel" onclick="confirmarCancelar()" href="#" title="Excluir">✖</a>
+      </div>
+    </main>
+  `;
+
+  document.body.appendChild(configPanel);
+  
+  document.getElementById('closeConfig').addEventListener('click', fecharCard);
+
+  // Adicionar event listener para o select de responsáveis
+  const responsavelSelect = document.getElementById('responsavel-select');
+  responsavelSelect.addEventListener('change', function() {
+      // Aqui você pode adicionar lógica para atualizar o cartão com o novo responsável
+      console.log('Novo responsável selecionado:', this.value);
+  });
 };
 
 function atualizarEtapaCartao(cardId, newFluxoId) {
