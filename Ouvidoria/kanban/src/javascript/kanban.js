@@ -463,6 +463,20 @@ function atualizarNovoResponsavel(id_cartao) {
   .catch(error => {
     console.error('Erro ao atualizar responsável do cartão:', error);
   });
+  
+  adicionarRespnsavelHistorico(newResponsavel);
+};
+
+function adicionarRespnsavelHistorico(newResponsavel) {
+
+  let msg = `O responsável do cartão foi modificada para ${newResponsavel}.`
+
+  const textMsg = document.createElement('p');
+  textMsg.innerHTML = `- ${msg}`;
+
+  const historico = document.getElementById("info-txt-historico");
+  historico.appendChild(textMsg);
+
 };
 
 async function fetchHistorico(id_cartao) {

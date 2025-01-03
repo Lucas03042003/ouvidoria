@@ -518,6 +518,13 @@ def atualizar_responsavel():
             cnx.rollback()
             return jsonify({"error": "Cartão não encontrado ou nenhuma alteração feita"}), 404
 
+        dia = datetime.now().date()
+        description = f"O responsável do cartão foi modificada para {new_responsavel} no dia {dia}."
+
+        # Atualizar a etapa do cartão
+        update_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s);"
+        cursor.execute(update_query, (card_id, description, dia))
+
         # Commit da transação
         cnx.commit()
 
