@@ -552,5 +552,35 @@ def atualizar_responsavel():
         if cnx:
             cnx.close()
             
+@app.route('/api/cartoes-exc-fin', methods=['GET'])
+def fetch_cartoes_exc_fin():
+    try:
+        # Obter o parâmetro de status da URL (valor padrão: None)
+        status = request.args.get('status', None)
+
+        # Conexão com o banco de dados
+        cnx = get_db_connection()
+        cursor = cnx.cursor(dictionary=True)
+
+        # Query SQL com filtro de status, se fornecido
+        if status:
+            query = "SELECT * FROM CartoesExcFin WHERE status = %s"
+            cursor.execute(query, (status,))
+        else:
+            query = "SELECT * FROM CartoesExcFin"
+            cursor.execute(query)
+
+        # Obter os resultados
+        resultado = cursor.fetchall()
+
+        # Fechar conexões
+        cursor.close()
+        cnx.close()
+
+        # Retornar os resultados como JSON
+        return jsonify(resultado), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)

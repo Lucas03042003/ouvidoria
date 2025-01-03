@@ -52,57 +52,78 @@ function expandirCardFinal(cliente, data, tag) {
   document.getElementById('closeConfig').addEventListener('click', fecharCard);
 };
 
-function abrirFinalizados() {
+async function abrirFinalizados() {
   if (document.getElementById('btn-finalizados').className != 'selecionado') {
+    // Atualiza os estilos dos botões
     document.getElementById('btn-finalizados').className = 'selecionado';
     document.getElementById('btn-home').className = 'opcao';
     document.getElementById('btn-excluidos').className = 'opcao';
 
     let centro = document.getElementById("content-kanban");
-    centro.innerHTML =`
+    let status = "finalizado";
+
+    // Busca os cartões "finalizados"
+    const cartoes = await fetchCartoesExcFin(status);
+
+    if (!cartoes || cartoes.length === 0) {
+      // Caso não haja cartões, exibe uma mensagem
+      centro.innerHTML = `<p>Nenhum cartão encontrado com o status "finalizado".</p>`;
+      return;
+    };
+
+    // Agrupa os cartões em pares
+    const paresDeCartoes = [];
+    for (let i = 0; i < cartoes.length; i += 2) {
+      paresDeCartoes.push(cartoes.slice(i, i + 2));
+    };
+
+    // Monta o HTML dos cartões
+    const html = `
       <div class="finalizados-list">
-        <div class="dupla-cards">
-          <div class="finalizados-cards">
-            <p><strong>Cliente:</strong> João Carlos</p>
-            <p><strong>Tema:</strong> Banheiros</p>
-            <p><strong>Data:</strong> 19/02/2025</p>
-            <p><strong>Conclusão:</strong> 19/02/2025</p>
-            <p><strong>Admin:</strong> Rafaela</p>
-          </div>
-          <div class="finalizados-cards">
-            <p><strong>Cliente:</strong> João Carlos</p>
-            <p><strong>Tema:</strong> Banheiros</p>
-            <p><strong>Data:</strong> 19/02/2025</p>
-            <p><strong>Conclusão:</strong> 19/02/2025</p>
-            <p><strong>Admin:</strong> Rafaela</p>
-          </div>
-        </div>
-        <div class="dupla-cards">
-          <div class="finalizados-cards">
-            <p><strong>Cliente:</strong> João Carlos</p>
-            <p><strong>Tema:</strong> Banheiros</p>
-            <p><strong>Data:</strong> 19/02/2025</p>
-            <p><strong>Conclusão:</strong> 19/02/2025</p>
-            <p><strong>Admin:</strong> Rafaela</p>
-          </div>
-          <div class="finalizados-cards">
-            <p><strong>Cliente:</strong> João Carlos</p>
-            <p><strong>Tema:</strong> Banheiros</p>
-            <p><strong>Data:</strong> 19/02/2025</p>
-            <p><strong>Conclusão:</strong> 19/02/2025</p>
-            <p><strong>Admin:</strong> Rafaela</p>
-          </div>
-        </div>
+        ${paresDeCartoes
+          .map(
+            (par) => `
+            <div class="dupla-cards">
+              ${par
+                .map(
+                  (cartao) => `
+                  <div class="finalizados-cards">
+                    <div class="badge-exfin" style="background-color: ${
+                      cartao.cor_tag || '#ccc'
+                    }; color: ${cartao.cor_texto || '#000'};">
+                      ${cartao.titulo_tag || 'Sem Tag'}
+                    </div>
+                    <p><strong>Cliente:</strong> ${cartao.Cliente}</p>
+                    <p><strong>Tema:</strong> ${cartao.Comentario}</p>
+                    <p><strong>Data:</strong> ${new Date(
+                      cartao.Data_comentario
+                    ).toLocaleDateString()}</p>
+                    <p><strong>Conclusão:</strong> ${new Date(
+                      cartao.Data_comentario
+                    ).toLocaleDateString()}</p>
+                    <p><strong>Admin:</strong> ${cartao.Administrador}</p>
+                  </div>
+                `
+                )
+                .join('')}
+            </div>
+          `
+          )
+          .join('')}
       </div>
     `;
 
+    // Adiciona o HTML ao centro
+    centro.innerHTML = html;
+
+    // Adiciona eventos e estilos aos cartões
     document.querySelectorAll(".finalizados-cards").forEach(card => {
       card.addEventListener('dblclick', expandirCardFinal);
     });
 
+    // Atualiza os eventos dos botões
     document.getElementById('btn-home').addEventListener('click', abrirHome);
     document.getElementById('btn-excluidos').addEventListener('click', abrirExluidos);
-
   };
 };
 
@@ -122,52 +143,95 @@ function abrirHome() {
   };
 };
 
-function abrirExluidos() {
+async function fetchCartoesExcFin(status) {
+  try {
+    // Definir a URL com o parâmetro de status, se fornecido
+    const url = status 
+      ? `http://127.0.0.1:5000/api/cartoes-exc-fin?status=${encodeURIComponent(status)}`
+      : 'http://127.0.0.1:5000/api/cartoes-exc-fin';
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erro HTTP! Status: ${response.status}`);
+    };
+
+    const data = await response.json();
+    console.log('Dados recebidos:', data);
+
+    return data;
+
+  } catch (error) {
+    console.error('Erro ao buscar os dados:', error);
+  };
+};
+
+async function abrirExluidos() {
   if (document.getElementById('btn-excluidos').className != 'selecionado') {
     document.getElementById('btn-finalizados').className = 'opcao';
     document.getElementById('btn-home').className = 'opcao';
     document.getElementById('btn-excluidos').className = 'selecionado';
 
     let centro = document.getElementById("content-kanban");
-    centro.innerHTML =`
+    let status = "excluído";
+    
+    const cartoes = await fetchCartoesExcFin(status);
+    console.log('aqui', cartoes);
+
+    if (!cartoes || cartoes.length === 0) {
+      // Caso não haja cartões, exibe uma mensagem
+      centro.innerHTML = ``;
+      return;
+    }
+
+    // Agrupa os cartões em pares para criar "duplas-cards"
+    const paresDeCartoes = [];
+    for (let i = 0; i < cartoes.length; i += 2) {
+      paresDeCartoes.push(cartoes.slice(i, i + 2));
+    }
+
+    // Monta o HTML
+    const html = `
       <div class="finalizados-list">
-        <div class="dupla-cards">
-          <div class="finalizados-cards">
-            <p><strong>Cliente:</strong> João Carlos</p>
-            <p><strong>Tema:</strong> Banheiros</p>
-            <p><strong>Data:</strong> 19/02/2025</p>
-            <p><strong>Conclusão:</strong> 19/02/2025</p>
-            <p><strong>Admin:</strong> Rafaela</p>
-          </div>
-          <div class="finalizados-cards">
-            <p><strong>Cliente:</strong> João Carlos</p>
-            <p><strong>Tema:</strong> Banheiros</p>
-            <p><strong>Data:</strong> 19/02/2025</p>
-            <p><strong>Conclusão:</strong> 19/02/2025</p>
-            <p><strong>Admin:</strong> Rafaela</p>
-          </div>
-        </div>
-        <div class="dupla-cards">
-          <div class="finalizados-cards">
-            <p><strong>Cliente:</strong> João Carlos</p>
-            <p><strong>Tema:</strong> Banheiros</p>
-            <p><strong>Data:</strong> 19/02/2025</p>
-            <p><strong>Conclusão:</strong> 19/02/2025</p>
-            <p><strong>Admin:</strong> Rafaela</p>
-          </div>
-          <div class="finalizados-cards">
-            <p><strong>Cliente:</strong> João Carlos</p>
-            <p><strong>Tema:</strong> Banheiros</p>
-            <p><strong>Data:</strong> 19/02/2025</p>
-            <p><strong>Conclusão:</strong> 19/02/2025</p>
-            <p><strong>Admin:</strong> Rafaela</p>
-          </div>
-        </div>
+        ${paresDeCartoes
+          .map(
+            (par) => `
+            <div class="dupla-cards">
+              ${par
+                .map(
+                  (cartao) => `
+                  <div class="finalizados-cards">
+                    <div class="badge-exfin" style="background-color: ${cartao.cor_tag || '#ccc'}; color: ${cartao.cor_texto || '#000'};">
+                      <span>${cartao.titulo_tag || 'Sem Tag'}</span>
+                    </div>
+                    <p><strong>Cliente:</strong> ${cartao.Cliente}</p>
+                    <p><strong>Tema:</strong> ${cartao.Comentario}</p>
+                    <p><strong>Data:</strong> ${new Date(
+                      cartao.Data_comentario
+                    ).toLocaleDateString()}</p>
+                    <p><strong>Admin:</strong> ${cartao.Administrador}</p>
+                    <p><strong>Status:</strong> ${cartao.status}</p>
+                  </div>
+                `
+                )
+                .join('')}
+            </div>
+          `
+          )
+          .join('')}
       </div>
     `;
 
+    // Insere o HTML no centro
+    centro.innerHTML = html;
+
     document.querySelectorAll(".finalizados-cards").forEach(card => {
-      card.style.backgroundColor = "#555";
+      card.style.backgroundColor = "#4f4f4f";
       card.addEventListener('dblclick', expandirCardFinal);
     });
 
