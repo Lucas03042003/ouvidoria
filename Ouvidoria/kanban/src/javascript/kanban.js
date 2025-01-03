@@ -265,10 +265,12 @@ async function expandirCard(id_cartao, cliente, data, tag, responsavel, cor_tag,
           <p>Comentário:</p>
           <p>${comentario}</p>
         </div>
-        <div class="informacoes">
+        <div class="informacoes" id="info-txt-historico">
           <h4>Histórico:</h4>
           <p></p>
           ${historico}
+        </div>
+        <div class="informacoes" id="msgbox-infos">
         </div>
       </div>
       <div class="action-buttons">
@@ -290,6 +292,83 @@ async function expandirCard(id_cartao, cliente, data, tag, responsavel, cor_tag,
   const tagSelect = document.getElementById('tag-select');
   tagSelect.addEventListener('change', function() {
       atualizarNovaTag(id_cartao);
+  });
+
+  adicionarCaixaTxt(id_cartao);
+
+};
+
+function adicionarCaixaTxt(id_cartao) {
+  // Criar o container principal
+  const caixaTexto = document.createElement('div');
+  caixaTexto.className = 'message-box';
+
+  // Criar o input
+  const inputTexto = document.createElement('input');
+  inputTexto.type = 'text';
+  inputTexto.id = 'message-box-input';
+  inputTexto.className = 'message-box-input';
+  inputTexto.placeholder = 'Escreva uma observação aqui...';
+
+  // Criar o botão
+  const botaoEnviar = document.createElement('button');
+  botaoEnviar.className = 'message-box-button';
+  botaoEnviar.id = "botaoEnviarTxt";
+  botaoEnviar.innerHTML = '&#9654;'; // Seta
+
+  // Adicionar os elementos ao container
+  caixaTexto.appendChild(inputTexto);
+  caixaTexto.appendChild(botaoEnviar);
+
+  const infos = document.getElementById("msgbox-infos");
+  infos.appendChild(caixaTexto);
+
+  document.getElementById("botaoEnviarTxt").addEventListener('click', function() {
+    enviarMsgTxt(id_cartao);
+  });
+}; 
+
+function enviarMsgTxt(id_cartao) {
+  
+  const input = document.getElementById("message-box-input");
+  let msg = input.value;
+
+  if (msg != '') {
+
+  const textMsg = document.createElement('p');
+  textMsg.innerHTML = `- ${msg}`;
+
+  const historico = document.getElementById("info-txt-historico");
+  historico.appendChild(textMsg);
+
+  input.value = '';
+
+  atualizarHistorico(msg, id_cartao);
+
+  };
+
+};
+
+async function atualizarHistorico(msg, id_cartao) {
+
+  await fetch('http://127.0.0.1:5000/atualizar-historico-msgs', {  
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        cardId: id_cartao,
+        mensagem: msg
+    })
+  })    
+  .then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  })
+  .catch(error => {
+    console.error('Erro ao atualizar responsável do cartão:', error);
   });
 
 };

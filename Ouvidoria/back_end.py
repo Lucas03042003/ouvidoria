@@ -400,6 +400,36 @@ def atualizar_etapa_cartao():
         if cnx:
             cnx.close()
 
+@app.route('/atualizar-historico-msgs', methods=['POST'])
+def atualizar_msg_historico():
+    try:
+        data = request.json
+        card_id = data.get('cardId')
+        msg = data.get('mensagem')
+        data_obs = datetime.now().date()
+
+        # Conexão com o banco de dados
+        cnx = get_db_connection()
+        cursor = cnx.cursor(dictionary=True)
+
+        # Inserir no banco de dados
+        query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
+        cursor.execute(query, (card_id, msg, data_obs))
+        
+        # Confirmar a transação
+        cnx.commit()
+
+        # Fechar o cursor e a conexão
+        cursor.close()
+        cnx.close()
+
+        # Retornar uma resposta de sucesso
+        return jsonify({"success": True, "message": "Histórico atualizado com sucesso"}), 200
+
+    except Exception as e:
+        # Tratar erros
+        return jsonify({"success": False, "error": str(e)}), 500
+    
 @app.route('/atualizar-tag-cartao', methods=['POST'])
 def atualizar_tag_cartao():
     cnx = None
