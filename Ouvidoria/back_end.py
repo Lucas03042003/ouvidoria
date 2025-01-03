@@ -2,6 +2,7 @@ import mysql.connector
 import logging
 from flask import Flask, jsonify, request
 import flask_cors
+from datetime import datetime
 
 app = Flask(__name__)
 flask_cors.CORS(app)  # Habilita CORS para todas as rotas
@@ -59,6 +60,26 @@ def ativar_sistema():
     cursor.close()
     cnx.close()
     return jsonify(resultado), 200
+
+@app.route('/ativar-historico', methods=['POST']) 
+def ativar_historico(): 
+	cnx = None 
+	cursor = None 
+
+	data = request.json 
+	card_id = data.get('cardId') 
+	
+	cnx = get_db_connection() 
+	cursor = cnx.cursor(dictionary=True) 
+
+	query = "SELECT descricao FROM Historico WHERE cartao = %s" 
+	cursor.execute(query, (card_id,))
+	
+	resultado = cursor.fetchall() 
+	cursor.close() 
+	cnx.close() 
+	
+	return jsonify(resultado), 200
 
 @app.route('/coletar-cartoes', methods=['POST'])
 def coletar_cartoes():
@@ -325,6 +346,7 @@ def atualizar_etapa_cartao():
         data = request.json
         card_id = data.get('cardId')
         new_fluxo_id = data.get('newFluxoId')
+        new_fluxo_name = data.get('nomeFluxo')
 
         if not card_id or not new_fluxo_id:
             return jsonify({"error": "Dados incompletos"}), 400
@@ -343,6 +365,12 @@ def atualizar_etapa_cartao():
         if cursor.rowcount == 0:
             cnx.rollback()
             return jsonify({"error": "Cartão não encontrado ou nenhuma alteração feita"}), 404
+        
+        horario = datetime.now().date()
+        descricao = f'O cartão foi movido para a etapa "{new_fluxo_name}" no dia {horario}.'
+
+        update_historico_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
+        cursor.execute(update_historico_query, (card_id,descricao,horario))
 
         # Commit da transação
         cnx.commit()
@@ -350,7 +378,8 @@ def atualizar_etapa_cartao():
         return jsonify({
             "message": "Etapa do cartão atualizada com sucesso",
             "cardId": card_id,
-            "newFluxoId": new_fluxo_id
+            "newFluxoId": new_fluxo_id,
+            "nomeFluxo": new_fluxo_name
         }), 200
 
     except mysql.connector.Error as e:

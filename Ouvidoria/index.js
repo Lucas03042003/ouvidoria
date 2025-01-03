@@ -435,12 +435,12 @@ function ativarFluxo() {
       <div class="task-list" id="task-list"></div>
   `;
 
-  fetchFluxos();
+  fetchFluxos(true);
 
   document.getElementById('closeConfig').addEventListener('click', desativarConfig);
 };
 
-async function fetchFluxos() {
+async function fetchFluxos(renderizar) {
   try {
       const response = await fetch('http://127.0.0.1:5000/ativar-fluxo', {
           method: 'POST',
@@ -450,7 +450,9 @@ async function fetchFluxos() {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       todosOsFluxos = await response.json();
-      renderizarFluxos();
+      if (renderizar) {  
+        renderizarFluxos();
+      };
   } catch (error) {
       console.error('Erro ao ativar fluxos:', error);
   };
@@ -764,7 +766,7 @@ function ativarConfig()  {
         <div class="task-list" id="task-list"></div>
     `;
   
-    fetchFluxos();
+    fetchFluxos(true);
   
     document.getElementById('closeConfig').addEventListener('click', desativarConfig);
   };

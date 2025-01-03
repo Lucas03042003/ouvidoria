@@ -1,5 +1,6 @@
 window.todosOsKanbans = [];
 window.todosOsCartoes = [];
+window.todosOsHistoricos = [];
  
 async function fetchKanban(recarregar) {
   try {
@@ -230,13 +231,20 @@ async function expandirCard(id_cartao, cliente, data, tag, responsavel, cor_tag,
      </option>`
   ).join('') : '';
 
+  await fetchHistorico(id_cartao);
+  console.log('teste novo', todosOsHistoricos)
+
+  const historico = window.todosOsHistoricos ? window.todosOsHistoricos.map(histo => 
+    `<p>- ${histo.descricao}</p>`
+  ).join('') : '';
+
   configPanel.innerHTML = `
     <main class="main-info" id="main_config">
       <div class="content-config">
         <a class="config-exit" id="closeConfig">x</a>
       </div>
       <h2>Cartão do Comentário</h2>
-      <div class="container-informacoes">
+      <div class="container-informacoes" id="container-informacoes">
         <div class="informacoes">
           <a>
           Tag:
@@ -257,6 +265,11 @@ async function expandirCard(id_cartao, cliente, data, tag, responsavel, cor_tag,
           <p>Comentário:</p>
           <p>${comentario}</p>
         </div>
+        <div class="informacoes">
+          <h4>Histórico:</h4>
+          <p></p>
+          ${historico}
+        </div>
       </div>
       <div class="action-buttons">
         <a class="btn btn-check" href="#" title="Finalizar">✔</a>
@@ -266,7 +279,6 @@ async function expandirCard(id_cartao, cliente, data, tag, responsavel, cor_tag,
   `;
 
   document.body.appendChild(configPanel);
-  
   document.getElementById('closeConfig').addEventListener('click', fecharCard);
 
   // Adicionar event listener para o select de responsáveis
@@ -360,7 +372,45 @@ function atualizarNovoResponsavel(id_cartao) {
   });
 };
 
-function atualizarEtapaCartao(cardId, newFluxoId) {
+async function fetchHistorico(id_cartao) {
+  try {
+      console.log('Iniciando fetchHistorico para o cartão:', id_cartao);
+
+      const response = await fetch('http://127.0.0.1:5000/ativar-historico', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json', 
+        },
+        body: JSON.stringify({
+          cardId: id_cartao
+        })
+      });
+
+      if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+      };
+
+      const historicoData = await response.json();
+      console.log('Histórico obtido:', historicoData);
+
+      window.todosOsHistoricos = historicoData;
+
+  } catch (error) {
+      console.error('Erro ao ativar Histórico:', error);
+      throw error;
+  };
+};
+
+async function atualizarEtapaCartao(cardId, newFluxoId) {
+
+  await fetchFluxos(false);
+  console.log('teste', todosOsFluxos);
+
+  const fluxoFiltrado = todosOsFluxos.find(fluxo => fluxo.id_fluxo === Number(newFluxoId));
+
+  let nomeFluxo = fluxoFiltrado.nome; 
+  console.log(nomeFluxo);
+
   fetch('http://127.0.0.1:5000/api/atualizar-etapa-cartao', {
       method: 'POST',
       headers: {
@@ -368,7 +418,8 @@ function atualizarEtapaCartao(cardId, newFluxoId) {
       },
       body: JSON.stringify({
           cardId: cardId,
-          newFluxoId: newFluxoId
+          newFluxoId: newFluxoId,
+          nomeFluxo: nomeFluxo
       })
   })
   .then(response => {
