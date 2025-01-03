@@ -223,7 +223,7 @@ async function expandirCard(id_cartao, cliente, data, tag, responsavel, cor_tag,
   ).join('') : '';
 
   const tagsOptions = todasAsTags ? todasAsTags.map(tagItem => 
-    `<option value="${tagItem.id_tag}" 
+    `<option value="${tagItem.id_tag}" id="TagItem${tagItem.id_tag}"
              style="background-color: ${tagItem.cor_tag}; color: ${tagItem.cor_texto}"
              ${tagItem.titulo === tag ? 'selected' : ''}>
         ${tagItem.titulo}
@@ -282,9 +282,22 @@ async function expandirCard(id_cartao, cliente, data, tag, responsavel, cor_tag,
 
 };
 
-function atualizarNovaTag(id_cartao) {
-  var selection = document.getElementById("tag-select");
-  var newTag = selection.options[selection.selectedIndex].text;
+async function atualizarNovaTag(id_cartao) {
+  let selection = document.getElementById("tag-select");
+  let newTag = selection.options[selection.selectedIndex].text;
+  let newTagId = selection.options[selection.selectedIndex].value;
+
+  // let id_tag = "TagItem" + newTagId
+  // let option = document.getElementById(id_tag)
+
+  // let backColor = option.backgroundColor
+  // let colorFont = option.color
+
+  await fetchTags(false);
+  tag_nova = todasAsTags.filter(tag => tag.titulo === newTag);
+
+  let backColor = tag_nova['0'].cor_tag;
+  let colorFont = tag_nova['0'].cor_texto;
 
   fetch('http://127.0.0.1:5000/atualizar-tag-cartao', {  
     method: 'POST',
@@ -308,6 +321,15 @@ function atualizarNovaTag(id_cartao) {
   .catch(error => {
     console.error('Erro ao atualizar responsável do cartão:', error);
   });
+
+  todosOsCartoes = todosOsCartoes.map(cartao => {
+    if (cartao.ID_Cartao === 1) {
+        return { ...cartao, tag_titulo: newTag, cor_tag: backColor, cor_texto_tag: colorFont};
+    }
+    return cartao;
+  });
+
+  renderizarCartoes(todosOsCartoes.filter(cartao => cartao.ID_Cartao === id_cartao));
 };
 
 function atualizarNovoResponsavel(id_cartao) {
