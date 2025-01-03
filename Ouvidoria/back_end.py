@@ -371,6 +371,60 @@ def atualizar_etapa_cartao():
         if cnx:
             cnx.close()
 
+@app.route('/atualizar-tag-cartao', methods=['POST'])
+def atualizar_tag_cartao():
+    cnx = None
+    cursor = None
+    try:
+        data = request.json
+        card_id = data.get('cardId')
+        new_tag = data.get('newTag')
+
+        if not card_id or not new_tag:
+            return jsonify({"error": "Dados incompletos"}), 400
+
+        cnx = get_db_connection()
+        cursor = cnx.cursor(dictionary=True)
+
+        # Iniciar uma transação
+        cnx.start_transaction()
+
+        # Atualizar a etapa do cartão
+        update_query = "UPDATE Cartoes SET Tag = (select id_tag from Tags where titulo=%s) where ID_Cartao = %s;"
+        cursor.execute(update_query, (new_tag, card_id))
+
+        # Verificar se a atualização foi bem-sucedida
+        if cursor.rowcount == 0:
+            cnx.rollback()
+            return jsonify({"error": "Cartão não encontrado ou nenhuma alteração feita"}), 404
+
+        # Commit da transação
+        cnx.commit()
+
+        return jsonify({
+            "message": "Responsável do cartão atualizada com sucesso",
+            "cardId": card_id,
+            "newTag": new_tag
+        }), 200
+
+    except mysql.connector.Error as e:
+        logging.error(f"Database error: {e}")
+        if cnx:
+            cnx.rollback()
+        return jsonify({"error": f"Erro de banco de dados: {str(e)}"}), 500
+
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
+        if cnx:
+            cnx.rollback()
+        return jsonify({"error": f"Erro inesperado: {str(e)}"}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if cnx:
+            cnx.close()
+
 @app.route('/atualizar-responsavel', methods=['POST'])
 def atualizar_responsavel():
     cnx = None

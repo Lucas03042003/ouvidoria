@@ -274,13 +274,47 @@ async function expandirCard(id_cartao, cliente, data, tag, responsavel, cor_tag,
   responsavelSelect.addEventListener('change', function() {
       atualizarNovoResponsavel(id_cartao);
   });
+
+  const tagSelect = document.getElementById('tag-select');
+  tagSelect.addEventListener('change', function() {
+      atualizarNovaTag(id_cartao);
+  });
+
+};
+
+function atualizarNovaTag(id_cartao) {
+  var selection = document.getElementById("tag-select");
+  var newTag = selection.options[selection.selectedIndex].text;
+
+  fetch('http://127.0.0.1:5000/atualizar-tag-cartao', {  
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        cardId: id_cartao,
+        newTag: newTag
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Responsável atualizado com sucesso:', data.message);
+  })
+  .catch(error => {
+    console.error('Erro ao atualizar responsável do cartão:', error);
+  });
 };
 
 function atualizarNovoResponsavel(id_cartao) {
   var selection = document.getElementById("responsavel-select");
   var newResponsavel = selection.options[selection.selectedIndex].text;
 
-  fetch('http://127.0.0.1:5000/atualizar-responsavel', {  // Corrigido o erro de digitação
+  fetch('http://127.0.0.1:5000/atualizar-responsavel', {  
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
@@ -302,13 +336,7 @@ function atualizarNovoResponsavel(id_cartao) {
   .catch(error => {
     console.error('Erro ao atualizar responsável do cartão:', error);
   });
-}
-
-// Função de exemplo para atualizar a UI (você precisará implementá-la)
-function atualizarUICartao(cartaoAtualizado) {
-  // Implemente a lógica para atualizar a UI com os novos dados do cartão
-  console.log('Atualizando UI com:', cartaoAtualizado);
-}
+};
 
 function atualizarEtapaCartao(cardId, newFluxoId) {
   fetch('http://127.0.0.1:5000/api/atualizar-etapa-cartao', {
