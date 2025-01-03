@@ -125,7 +125,7 @@ function renderizarCartoes(cartoes) {
       });
 
       cardElement.addEventListener('dblclick', () => {
-          expandirCard(cartao.Cliente, cartao.Data_comentario, cartao.tag_titulo, cartao.admin_nome, cartao.cor_tag, cartao.cor_texto_tag, cartao.Comentario);
+          expandirCard(cartao.ID_Cartao, cartao.Cliente, cartao.Data_comentario, cartao.tag_titulo, cartao.admin_nome, cartao.cor_tag, cartao.cor_texto_tag, cartao.Comentario);
       });
   });
 
@@ -180,7 +180,7 @@ function confirmarCancelar() {
     };
 };
 
-async function expandirCard(cliente, data, tag, responsavel, cor_tag, cor_texto_tag, comentario) {
+async function expandirCard(id_cartao, cliente, data, tag, responsavel, cor_tag, cor_texto_tag, comentario) {
   const elemento = document.querySelector('.container');
   elemento.style.filter = 'blur(5px)';
   
@@ -246,10 +246,12 @@ async function expandirCard(cliente, data, tag, responsavel, cor_tag, cor_texto_
           </a>
           <p>Cliente: ${cliente}</p>
           <p>Data do comentário: ${data}</p>
-          <label for="responsavel-select">Responsável:</label>
-          <select id="responsavel-select" style="background-color: transparent; color: inherit; border: 1px solid #807E7E;">
-            ${responsaveisOptions}
-          </select>
+          <p>
+            Responsável:
+            <select id="responsavel-select" style="background-color: transparent; color: inherit; border: 1px solid #807E7E;">
+              ${responsaveisOptions}
+            </select>
+          </p>
         </div>
         <div class="informacoes">
           <p>Comentário:</p>
@@ -270,10 +272,43 @@ async function expandirCard(cliente, data, tag, responsavel, cor_tag, cor_texto_
   // Adicionar event listener para o select de responsáveis
   const responsavelSelect = document.getElementById('responsavel-select');
   responsavelSelect.addEventListener('change', function() {
-      // Aqui você pode adicionar lógica para atualizar o cartão com o novo responsável
-      console.log('Novo responsável selecionado:', this.value);
+      atualizarNovoResponsavel(id_cartao);
   });
 };
+
+function atualizarNovoResponsavel(id_cartao) {
+  var selection = document.getElementById("responsavel-select");
+  var newResponsavel = selection.options[selection.selectedIndex].text;
+
+  fetch('http://127.0.0.1:5000/atualizar-responsavel', {  // Corrigido o erro de digitação
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        cardId: id_cartao,
+        newResponsavel: newResponsavel
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Responsável atualizado com sucesso:', data.message);
+  })
+  .catch(error => {
+    console.error('Erro ao atualizar responsável do cartão:', error);
+  });
+}
+
+// Função de exemplo para atualizar a UI (você precisará implementá-la)
+function atualizarUICartao(cartaoAtualizado) {
+  // Implemente a lógica para atualizar a UI com os novos dados do cartão
+  console.log('Atualizando UI com:', cartaoAtualizado);
+}
 
 function atualizarEtapaCartao(cardId, newFluxoId) {
   fetch('http://127.0.0.1:5000/api/atualizar-etapa-cartao', {
