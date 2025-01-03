@@ -457,6 +457,13 @@ def atualizar_tag_cartao():
             cnx.rollback()
             return jsonify({"error": "Cartão não encontrado ou nenhuma alteração feita"}), 404
 
+        dia = datetime.now().date()
+        description = f"A tag do cartão foi modificada para {new_tag} no dia {dia}."
+
+        # Atualizar a etapa do cartão
+        update_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s);"
+        cursor.execute(update_query, (card_id, description, dia))
+
         # Commit da transação
         cnx.commit()
 

@@ -1,7 +1,7 @@
 window.todosOsKanbans = [];
 window.todosOsCartoes = [];
 window.todosOsHistoricos = [];
- 
+
 async function fetchKanban(recarregar) {
   try {
       const response = await fetch('http://127.0.0.1:5000/ativar-fluxo', {
@@ -420,7 +420,21 @@ async function atualizarNovaTag(id_cartao) {
     return cartao;
   });
 
+  adicionarTagHistorico(newTag);
   renderizarCartoes(todosOsCartoes.filter(cartao => cartao.ID_Cartao === id_cartao));
+};
+
+function adicionarTagHistorico(newTag) {
+  
+  let new_tag = newTag;
+  let msg = `A tag do cartão foi modificada para ${new_tag}.`
+
+  const textMsg = document.createElement('p');
+  textMsg.innerHTML = `- ${msg}`;
+
+  const historico = document.getElementById("info-txt-historico");
+  historico.appendChild(textMsg);
+
 };
 
 function atualizarNovoResponsavel(id_cartao) {
