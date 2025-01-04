@@ -126,7 +126,7 @@ function renderizarCartoes(cartoes) {
       });
 
       cardElement.addEventListener('dblclick', () => {
-          expandirCard(cartao.ID_Cartao, cartao.Cliente, cartao.Data_comentario, cartao.tag_titulo, cartao.admin_nome, cartao.cor_tag, cartao.cor_texto_tag, cartao.Comentario);
+          expandirCard(cartao.ID_Cartao);
       });
   });
 
@@ -181,7 +181,18 @@ function confirmarCancelar() {
     };
 };
 
-async function expandirCard(id_cartao, cliente, data, tag, responsavel, cor_tag, cor_texto_tag, comentario) {
+async function expandirCard(id_cartao) {
+
+  const cartao = todosOsCartoes.find(cartao => cartao.ID_Cartao === id_cartao);
+  
+  let cliente = cartao.Cliente
+  let data = cartao.Data_comentario
+  let tag = cartao.tag_titulo
+  let responsavel = cartao.admin_nome
+  let cor_tag = cartao.cor_tag
+  let cor_texto_tag = cartao.cor_texto_tag
+  let comentario = cartao.Comentario
+
   const elemento = document.querySelector('.container');
   elemento.style.filter = 'blur(5px)';
   
