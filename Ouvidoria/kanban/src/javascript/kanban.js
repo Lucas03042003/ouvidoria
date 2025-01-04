@@ -100,8 +100,8 @@ function renderizarCartoes(cartoes) {
       cardElement.dataset.id = cartao.ID_Cartao;
 
       cardElement.innerHTML = `
-          <div class="badge" style="background-color: ${cartao.cor_tag || '#ccc'}; color: ${cartao.cor_texto_tag || '#000'};">
-              <span>${cartao.tag_titulo || 'Sem Tag'}</span>
+          <div class="badge" id="badge-${cartao.ID_Cartao}" style="background-color: ${cartao.cor_tag || '#ccc'}; color: ${cartao.cor_texto_tag || '#000'};">
+              <span id="span-${cartao.ID_Cartao}">${cartao.tag_titulo || 'Sem Tag'}</span>
           </div>
           <div class="card-text">
               <a id="client">Cliente: ${cartao.Cliente || 'Sem Cliente'}</a>
@@ -378,12 +378,6 @@ async function atualizarNovaTag(id_cartao) {
   let newTag = selection.options[selection.selectedIndex].text;
   let newTagId = selection.options[selection.selectedIndex].value;
 
-  // let id_tag = "TagItem" + newTagId
-  // let option = document.getElementById(id_tag)
-
-  // let backColor = option.backgroundColor
-  // let colorFont = option.color
-
   await fetchTags(false);
   tag_nova = todasAsTags.filter(tag => tag.titulo === newTag);
 
@@ -414,14 +408,38 @@ async function atualizarNovaTag(id_cartao) {
   });
 
   todosOsCartoes = todosOsCartoes.map(cartao => {
-    if (cartao.ID_Cartao === 1) {
+    if (cartao.ID_Cartao === id_cartao) {
         return { ...cartao, tag_titulo: newTag, cor_tag: backColor, cor_texto_tag: colorFont};
     }
     return cartao;
   });
 
   adicionarTagHistorico(newTag);
-  renderizarCartoes(todosOsCartoes.filter(cartao => cartao.ID_Cartao === id_cartao));
+  modificarCartao(id_cartao, newTag, backColor, colorFont);
+};
+
+function modificarCartao(id_cartao, novoTitulo, novaCorTag, novaCorTexto) {
+
+  console.log(`Atualizando badge para o ID_Cartao: ${id_cartao}`);
+
+  let badge = document.getElementById(`badge-${id_cartao}`);
+  let span = document.getElementById(`span-${id_cartao}`);
+  
+  if (!badge) {
+    console.error(`Elemento badge-${id_cartao} não encontrado!`);
+  } else {
+    console.log(`Badge encontrado:`, badge);
+  }
+  
+  if (!span) {
+    console.error(`Elemento span-${id_cartao} não encontrado!`);
+  } else {
+    console.log(`Span encontrado:`, span);
+  }
+  badge.style.backgroundColor = novaCorTag || '#ccc';
+  badge.style.color = novaCorTexto || '#000';
+  span.textContent = novoTitulo || 'Sem Tag';
+
 };
 
 function adicionarTagHistorico(newTag) {
