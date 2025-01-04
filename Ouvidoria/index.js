@@ -67,7 +67,7 @@ async function abrirFinalizados() {
 
     if (!cartoes || cartoes.length === 0) {
       // Caso não haja cartões, exibe uma mensagem
-      centro.innerHTML = `<p>Nenhum cartão encontrado com o status "finalizado".</p>`;
+      centro.innerHTML = ``;
       return;
     };
 
@@ -99,7 +99,7 @@ async function abrirFinalizados() {
                       cartao.Data_comentario
                     ).toLocaleDateString()}</p>
                     <p><strong>Conclusão:</strong> ${new Date(
-                      cartao.Data_comentario
+                      cartao.Data_conclusao
                     ).toLocaleDateString()}</p>
                     <p><strong>Admin:</strong> ${cartao.Administrador}</p>
                   </div>
@@ -214,8 +214,10 @@ async function abrirExluidos() {
                     <p><strong>Data:</strong> ${new Date(
                       cartao.Data_comentario
                     ).toLocaleDateString()}</p>
+                    <p><strong>Exclusão:</strong> ${new Date(
+                      cartao.Data_conclusao
+                    ).toLocaleDateString()}</p>
                     <p><strong>Admin:</strong> ${cartao.Administrador}</p>
-                    <p><strong>Status:</strong> ${cartao.status}</p>
                   </div>
                 `
                 )
@@ -712,14 +714,21 @@ function criarElementoUsuario(usuario, roles) {
       </select>
   `;
 
+  // Adicionar event listeners para atualizar os dados do usuário
+  userItem.querySelector('.user-email').addEventListener('input', () => atualizarUsuario(usuario.id_user, userItem));
+  userItem.querySelector('.key-user').addEventListener('input', () => atualizarUsuario(usuario.id_user, userItem));
+  userItem.querySelector('.user-role').addEventListener('change', () => atualizarUsuario(usuario.id_user, userItem));
+
   return userItem;
 };
 
-function atualizarUsuario(userItem) {
-  const id_user = parseInt(userItem.dataset.id);
+function atualizarUsuario(id_u, userItem) {
+  const id_user = parseInt(id_u);
   const email = userItem.querySelector('.user-email').textContent;
   const senha = userItem.querySelector('.key-user').textContent;
   const permissoes = userItem.querySelector('.user-role').value;
+
+  console.log(id_user, email, senha);
 
   const usuario = todosOsUsuarios.find(u => u.id_user === id_user);
   if (usuario) {
