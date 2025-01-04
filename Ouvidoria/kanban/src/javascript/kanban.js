@@ -185,13 +185,13 @@ async function expandirCard(id_cartao) {
 
   const cartao = todosOsCartoes.find(cartao => cartao.ID_Cartao === id_cartao);
   
-  let cliente = cartao.Cliente
-  let data = cartao.Data_comentario
-  let tag = cartao.tag_titulo
-  let responsavel = cartao.admin_nome
-  let cor_tag = cartao.cor_tag
-  let cor_texto_tag = cartao.cor_texto_tag
-  let comentario = cartao.Comentario
+  let cliente = cartao.Cliente;
+  let data = cartao.Data_comentario;
+  let tag = cartao.tag_titulo;
+  let responsavel = cartao.admin_nome;
+  let cor_tag = cartao.cor_tag;
+  let cor_texto_tag = cartao.cor_texto_tag;
+  let comentario = cartao.Comentario;
 
   const elemento = document.querySelector('.container');
   elemento.style.filter = 'blur(5px)';
