@@ -114,7 +114,7 @@ def coletar_cartoes():
         cursor = cnx.cursor(dictionary=True)
 
         query = """
-        SELECT c.ID_Cartao, c.Cliente, c.Data_comentario, c.Comentario, 
+        SELECT c.ID_Cartao, c.Cliente, c.Data_comentario, c.Data_conclusao, c.titulo_tag as ctitulo_tag, c.cor_tag as ccor_tag, c.cor_texto as ccor_texto,c.Comentario, 
                c.Etapa, c.Tag, c.Administrador, f.nome as nome_fluxo, f.id_fluxo, t.titulo as tag_titulo, 
                t.cor_tag, t.cor_texto as cor_texto_tag, u.email as admin_nome
         FROM Cartoes c

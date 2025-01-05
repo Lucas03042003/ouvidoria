@@ -3,19 +3,19 @@ let todasOsFluxos = [];
 let todasAsTags = [];
 let todosOsUsuarios = [];
 
-async function expandirCardFinal(cartao) {
+async function expandirCardFinal(cartao, stat) {
 
   let id_cartao = cartao.ID_Cartao;
   let cliente = cartao.Cliente;
   let data = cartao.Data_comentario;
-  let tag = cartao.titulo_tag;
+  let tag = cartao.ctitulo_tag;
   let responsavel = cartao.admin_nome;
-  let cor_tag = cartao.cor_tag;
-  let cor_texto_tag = cartao.cor_texto;
+  let cor_tag = cartao.ccor_tag;
+  let cor_texto_tag = cartao.ccor_texto;
   let comentario = cartao.Comentario;
 
   let status = "Exclusão";  
-  if (cartao.status == "finalizado") {
+  if (stat == "finalizado") {
     status = "Finalização";
   }
 
@@ -65,7 +65,7 @@ async function expandirCardFinal(cartao) {
         <div class="informacoes">
           <a>
           Tag:
-          <a id="tag-select" class="badge-exfin" style="background-color: ${cor_tag}; color: ${cor_texto_tag}; margin-bottom: 0px;">${tag}</a>
+          <a id="tag-select" class="badge-exfin" style="background-color: ${cor_tag  || '#ccc'}; color: ${cor_texto_tag || '#000'}; margin-bottom: 0px;">${tag}</a>
           </a>
           <p>Cliente: ${cliente}</p>
           <p>Data do comentário: ${data}</p>
@@ -128,8 +128,8 @@ async function abrirFinalizados() {
         let card = document.createElement('div');
         card.className = "finalizados-cards";
         card.innerHTML = `
-          <div class="badge-exfin" style="background-color: ${cartao.cor_tag || '#ccc'}; color: ${cartao.cor_texto || '#000'};">
-            <span>${cartao.titulo_tag || 'Sem Tag'}</span>
+          <div class="badge-exfin" style="background-color: ${cartao.ccor_tag || '#ccc'}; color: ${cartao.ccor_texto || '#000'};">
+            <span>${cartao.ctitulo_tag || 'Sem Tag'}</span>
           </div>
           <p><strong>Cliente:</strong> ${cartao.Cliente}</p>
           <p><strong>Tema:</strong> ${cartao.Comentario}</p>
@@ -144,7 +144,7 @@ async function abrirFinalizados() {
 
         dupla.appendChild(card);
 
-        card.addEventListener('dblclick', function() {expandirCardFinal(cartao)});
+        card.addEventListener('dblclick', function() {expandirCardFinal(cartao, status)});
 
       });
     });
@@ -205,8 +205,8 @@ async function abrirExluidos() {
         let card = document.createElement('div');
         card.className = "finalizados-cards";
         card.innerHTML = `
-          <div class="badge-exfin" style="background-color: ${cartao.cor_tag || '#ccc'}; color: ${cartao.cor_texto || '#000'};">
-            <span>${cartao.titulo_tag || 'Sem Tag'}</span>
+          <div class="badge-exfin" style="background-color: ${cartao.ccor_tag || '#ccc'}; color: ${cartao.ccor_texto || '#000'};">
+            <span>${cartao.ctitulo_tag || 'Sem Tag'}</span>
           </div>
           <p><strong>Cliente:</strong> ${cartao.Cliente}</p>
           <p><strong>Tema:</strong> ${cartao.Comentario}</p>
@@ -221,7 +221,7 @@ async function abrirExluidos() {
 
         dupla.appendChild(card);
 
-        card.addEventListener('dblclick', function() {expandirCardFinal(cartao)});
+        card.addEventListener('dblclick', function() {expandirCardFinal(cartao, status)});
 
       });
     });
