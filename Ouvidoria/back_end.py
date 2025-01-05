@@ -81,6 +81,26 @@ def ativar_historico():
 	
 	return jsonify(resultado), 200
 
+@app.route('/ativar-historico-exfin', methods=['POST']) 
+def ativar_historico_exfin(): 
+	cnx = None 
+	cursor = None 
+
+	data = request.json 
+	card_id = data.get('cardId') 
+	
+	cnx = get_db_connection() 
+	cursor = cnx.cursor(dictionary=True) 
+
+	query = "SELECT descricao FROM HistoricoExcFin WHERE cartao = %s" 
+	cursor.execute(query, (card_id,))
+	
+	resultado = cursor.fetchall() 
+	cursor.close() 
+	cnx.close() 
+	
+	return jsonify(resultado), 200
+
 @app.route('/coletar-cartoes', methods=['POST'])
 def coletar_cartoes():
     cnx = None

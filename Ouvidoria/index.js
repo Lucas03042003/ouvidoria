@@ -48,12 +48,12 @@ async function expandirCardFinal(cartao) {
   configPanel.style.borderRadius = '5px';
   configPanel.style.zIndex = '1001';
 
-  // await fetchHistorico(id_cartao);
-  // console.log('teste novo', todosOsHistoricos)
+  let history = await fetchHistoricoExFin(id_cartao);
+  console.log('teste novo', history)
 
-  // const historico = window.todosOsHistoricos ? window.todosOsHistoricos.map(histo => 
-  //   `<p>- ${histo.descricao}</p>`
-  // ).join('') : '';
+  const historico = history ? history.map(histo => 
+    `<p>- ${histo.descricao}</p>`
+  ).join('') : '';
 
   configPanel.innerHTML = `
     <main class="main-info" id="main_config">
@@ -79,14 +79,10 @@ async function expandirCardFinal(cartao) {
         <div class="informacoes" id="info-txt-historico">
           <h4>Histórico:</h4>
           <p></p>
-
+          ${historico}
         </div>
         <div class="informacoes" id="msgbox-infos">
         </div>
-      </div>
-      <div class="action-buttons">
-        <a class="btn btn-check" href="#" title="Finalizar">✔</a>
-        <a class="btn btn-cancel" onclick="confirmarCancelar()" href="#" title="Excluir">✖</a>
       </div>
     </main>
   `;
@@ -95,6 +91,37 @@ async function expandirCardFinal(cartao) {
   document.getElementById('closeConfig').addEventListener('click', fecharCard);
 
 };
+
+
+async function fetchHistoricoExFin(id_cartao) {
+  try {
+      console.log('Iniciando fetchHistorico para o cartão:', id_cartao);
+
+      const response = await fetch('http://127.0.0.1:5000/ativar-historico-exfin', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json', 
+        },
+        body: JSON.stringify({
+          cardId: id_cartao
+        })
+      });
+
+      if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+      };
+
+      const historicoData = await response.json();
+      console.log('Histórico obtido:', historicoData);
+
+      return historicoData;
+
+  } catch (error) {
+      console.error('Erro ao ativar Histórico:', error);
+      throw error;
+  };
+};
+
 
 async function abrirFinalizados() {
   if (document.getElementById('btn-finalizados').className != 'selecionado') {
@@ -167,7 +194,6 @@ function abrirHome() {
     let centro = document.getElementById("content-kanban");
     centro.innerHTML =``;
     $('#content-kanban').load('kanban.html');
-    configKanban();
 
     document.getElementById('btn-finalizados').addEventListener('click', abrirFinalizados);
     document.getElementById('btn-excluidos').addEventListener('click', abrirExluidos);
