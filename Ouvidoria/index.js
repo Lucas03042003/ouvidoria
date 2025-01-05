@@ -3,11 +3,25 @@ let todasOsFluxos = [];
 let todasAsTags = [];
 let todosOsUsuarios = [];
 
-function expandirCardFinal(cliente, data, tag) {
+async function expandirCardFinal(cartao) {
+
+  let id_cartao = cartao.ID_Cartao;
+  let cliente = cartao.Cliente;
+  let data = cartao.Data_comentario;
+  let tag = cartao.titulo_tag;
+  let responsavel = cartao.Administrador;
+  let cor_tag = cartao.cor_tag;
+  let cor_texto_tag = cartao.cor_texto;
+  let comentario = cartao.Comentario;
+
+  let status = "Exclusão";  
+  if (cartao.status == "finalizado") {
+    status = "Finalização";
+  }
+
   const elemento = document.querySelector('.container');
   elemento.style.filter = 'blur(5px)';
   
-  // Criar um overlay para prevenir interações
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
   overlay.style.position = 'fixed';
@@ -15,18 +29,15 @@ function expandirCardFinal(cliente, data, tag) {
   overlay.style.left = '0';
   overlay.style.width = '100%';
   overlay.style.height = '100%';
-  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'; // Fundo semi-transparente
-  overlay.style.zIndex = '1000'; // Certifique-se de que está acima de outros elementos
+  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+  overlay.style.zIndex = '1000';
   
-  // Adicionar o overlay ao body
   document.body.appendChild(overlay);
   
-  // Criar e exibir o painel de configurações
   const configPanel = document.createElement('div');
   configPanel.className = 'body-config';
   configPanel.id = 'configPanel';
   configPanel.style.position = 'fixed';
-  // configPanel.style.display = 'flex';
   configPanel.style.top = '50%';
   configPanel.style.left = '50%';
   configPanel.style.height = '50%';
@@ -34,22 +45,55 @@ function expandirCardFinal(cliente, data, tag) {
   configPanel.style.transform = 'translate(-50%, -50%)';
   configPanel.style.backgroundColor = '#333';
   configPanel.style.color = '#807E7E';
-  // configPanel.style.padding = '20px';
   configPanel.style.borderRadius = '5px';
-  configPanel.style.zIndex = '1001'; // Acima do overlay
+  configPanel.style.zIndex = '1001';
+
+  // await fetchHistorico(id_cartao);
+  // console.log('teste novo', todosOsHistoricos)
+
+  // const historico = window.todosOsHistoricos ? window.todosOsHistoricos.map(histo => 
+  //   `<p>- ${histo.descricao}</p>`
+  // ).join('') : '';
+
   configPanel.innerHTML = `
-      <main class="main-config" id="main_config">
-        <div class="content-config">
-          <a class="config-exit" id="closeConfig">x</a>
+    <main class="main-info" id="main_config">
+      <div class="content-config">
+        <a class="config-exit" id="closeConfig">x</a>
+      </div>
+      <h2>Cartão do Comentário</h2>
+      <div class="container-informacoes" id="container-informacoes">
+        <div class="informacoes">
+          <a>
+          Tag:
+          <a id="tag-select" class="badge-exfin" style="background-color: ${cor_tag}; color: ${cor_texto_tag}; margin-bottom: 0px;">${tag}</a>
+          </a>
+          <p>Cliente: ${cliente}</p>
+          <p>Data do comentário: ${data}</p>
+          <p>${status}: ${cartao.Data_conclusao}</p>
+          <p>Responsável: ${responsavel}</p>
         </div>
-        <h2>Cartão do paciente</h2>
-      </main>
+        <div class="informacoes">
+          <p>Comentário:</p>
+          <p>${comentario}</p>
+        </div>
+        <div class="informacoes" id="info-txt-historico">
+          <h4>Histórico:</h4>
+          <p></p>
+
+        </div>
+        <div class="informacoes" id="msgbox-infos">
+        </div>
+      </div>
+      <div class="action-buttons">
+        <a class="btn btn-check" href="#" title="Finalizar">✔</a>
+        <a class="btn btn-cancel" onclick="confirmarCancelar()" href="#" title="Excluir">✖</a>
+      </div>
+    </main>
   `;
 
   document.body.appendChild(configPanel);
-  
-  // Adicionar evento para fechar as configurações
   document.getElementById('closeConfig').addEventListener('click', fecharCard);
+
 };
 
 async function abrirFinalizados() {
@@ -65,60 +109,47 @@ async function abrirFinalizados() {
     // Busca os cartões "finalizados"
     const cartoes = await fetchCartoesExcFin(status);
 
-    if (!cartoes || cartoes.length === 0) {
-      // Caso não haja cartões, exibe uma mensagem
-      centro.innerHTML = ``;
-      return;
-    };
+    centro.innerHTML = ``;
 
-    // Agrupa os cartões em pares
+    // Agrupa os cartões em pares para criar "duplas-cards"
     const paresDeCartoes = [];
     for (let i = 0; i < cartoes.length; i += 2) {
       paresDeCartoes.push(cartoes.slice(i, i + 2));
-    };
+    }
 
-    // Monta o HTML dos cartões
-    const html = `
-      <div class="finalizados-list">
-        ${paresDeCartoes
-          .map(
-            (par) => `
-            <div class="dupla-cards">
-              ${par
-                .map(
-                  (cartao) => `
-                  <div class="finalizados-cards">
-                    <div class="badge-exfin" style="background-color: ${
-                      cartao.cor_tag || '#ccc'
-                    }; color: ${cartao.cor_texto || '#000'};">
-                      ${cartao.titulo_tag || 'Sem Tag'}
-                    </div>
-                    <p><strong>Cliente:</strong> ${cartao.Cliente}</p>
-                    <p><strong>Tema:</strong> ${cartao.Comentario}</p>
-                    <p><strong>Data:</strong> ${new Date(
-                      cartao.Data_comentario
-                    ).toLocaleDateString()}</p>
-                    <p><strong>Conclusão:</strong> ${new Date(
-                      cartao.Data_conclusao
-                    ).toLocaleDateString()}</p>
-                    <p><strong>Admin:</strong> ${cartao.Administrador}</p>
-                  </div>
-                `
-                )
-                .join('')}
-            </div>
-          `
-          )
-          .join('')}
-      </div>
-    `;
+    let list = document.createElement('div');
+    list.className = "finalizados-list";
+    list.innerHTML = ``;
+    centro.appendChild(list);
 
-    // Adiciona o HTML ao centro
-    centro.innerHTML = html;
+    paresDeCartoes.forEach(par=>{
+      let dupla = document.createElement('div');
+      dupla.className = "dupla-cards";
+      list.appendChild(dupla);
 
-    // Adiciona eventos e estilos aos cartões
-    document.querySelectorAll(".finalizados-cards").forEach(card => {
-      card.addEventListener('dblclick', expandirCardFinal);
+      par.forEach(cartao=>{
+        let card = document.createElement('div');
+        card.className = "finalizados-cards";
+        card.innerHTML = `
+          <div class="badge-exfin" style="background-color: ${cartao.cor_tag || '#ccc'}; color: ${cartao.cor_texto || '#000'};">
+            <span>${cartao.titulo_tag || 'Sem Tag'}</span>
+          </div>
+          <p><strong>Cliente:</strong> ${cartao.Cliente}</p>
+          <p><strong>Tema:</strong> ${cartao.Comentario}</p>
+          <p><strong>Data:</strong> ${new Date(
+            cartao.Data_comentario
+          ).toLocaleDateString()}</p>
+          <p><strong>Conclusão:</strong> ${new Date(
+            cartao.Data_conclusao
+          ).toLocaleDateString()}</p>
+          <p><strong>Admin:</strong> ${cartao.Administrador}</p>
+        `;
+
+        dupla.appendChild(card);
+
+        card.addEventListener('dblclick', function() {expandirCardFinal(cartao)});
+
+      });
     });
 
     // Atualiza os eventos dos botões
@@ -183,11 +214,7 @@ async function abrirExluidos() {
     const cartoes = await fetchCartoesExcFin(status);
     console.log('aqui', cartoes);
 
-    if (!cartoes || cartoes.length === 0) {
-      // Caso não haja cartões, exibe uma mensagem
-      centro.innerHTML = ``;
-      return;
-    }
+    centro.innerHTML = ``;
 
     // Agrupa os cartões em pares para criar "duplas-cards"
     const paresDeCartoes = [];
@@ -195,46 +222,39 @@ async function abrirExluidos() {
       paresDeCartoes.push(cartoes.slice(i, i + 2));
     }
 
-    // Monta o HTML
-    const html = `
-      <div class="finalizados-list">
-        ${paresDeCartoes
-          .map(
-            (par) => `
-            <div class="dupla-cards">
-              ${par
-                .map(
-                  (cartao) => `
-                  <div class="finalizados-cards">
-                    <div class="badge-exfin" style="background-color: ${cartao.cor_tag || '#ccc'}; color: ${cartao.cor_texto || '#000'};">
-                      <span>${cartao.titulo_tag || 'Sem Tag'}</span>
-                    </div>
-                    <p><strong>Cliente:</strong> ${cartao.Cliente}</p>
-                    <p><strong>Tema:</strong> ${cartao.Comentario}</p>
-                    <p><strong>Data:</strong> ${new Date(
-                      cartao.Data_comentario
-                    ).toLocaleDateString()}</p>
-                    <p><strong>Exclusão:</strong> ${new Date(
-                      cartao.Data_conclusao
-                    ).toLocaleDateString()}</p>
-                    <p><strong>Admin:</strong> ${cartao.Administrador}</p>
-                  </div>
-                `
-                )
-                .join('')}
-            </div>
-          `
-          )
-          .join('')}
-      </div>
-    `;
+    let list = document.createElement('div');
+    list.className = "finalizados-list";
+    list.innerHTML = ``;
+    centro.appendChild(list);
 
-    // Insere o HTML no centro
-    centro.innerHTML = html;
+    paresDeCartoes.forEach(par=>{
+      let dupla = document.createElement('div');
+      dupla.className = "dupla-cards";
+      list.appendChild(dupla);
 
-    document.querySelectorAll(".finalizados-cards").forEach(card => {
-      card.style.backgroundColor = "#4f4f4f";
-      card.addEventListener('dblclick', expandirCardFinal);
+      par.forEach(cartao=>{
+        let card = document.createElement('div');
+        card.className = "finalizados-cards";
+        card.innerHTML = `
+          <div class="badge-exfin" style="background-color: ${cartao.cor_tag || '#ccc'}; color: ${cartao.cor_texto || '#000'};">
+            <span>${cartao.titulo_tag || 'Sem Tag'}</span>
+          </div>
+          <p><strong>Cliente:</strong> ${cartao.Cliente}</p>
+          <p><strong>Tema:</strong> ${cartao.Comentario}</p>
+          <p><strong>Data:</strong> ${new Date(
+            cartao.Data_comentario
+          ).toLocaleDateString()}</p>
+          <p><strong>Exclusão:</strong> ${new Date(
+            cartao.Data_conclusao
+          ).toLocaleDateString()}</p>
+          <p><strong>Admin:</strong> ${cartao.Administrador}</p>
+        `;
+
+        dupla.appendChild(card);
+
+        card.addEventListener('dblclick', function() {expandirCardFinal(cartao)});
+
+      });
     });
 
     document.getElementById('btn-home').addEventListener('click', abrirHome);
