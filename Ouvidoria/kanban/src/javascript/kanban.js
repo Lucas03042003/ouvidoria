@@ -38,30 +38,33 @@ function renderizarKanban() {
 
   kanban.innerHTML = kanbanHTML;
 
-  fetchCartoes(true);
+  fetchCartoes(true, "normal");
 
 };
 
-async function fetchCartoes(renderizar) {
-    try {
+async function fetchCartoes(renderizar, status) {
+  try {
       const response = await fetch('http://127.0.0.1:5000/coletar-cartoes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status: status }) 
       });
-  
+
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-  
+
       window.todosOsCartoes = await response.json();
       console.log('Cartões coletados:', window.todosOsCartoes);
-      
-      // Aqui você pode chamar uma função para renderizar os cartões
+
+      // Chama a função para renderizar os cartões, se necessário
       if (renderizar) {
-        renderizarCartoes(todosOsCartoes);
-      };
-    } catch (error) {
+          renderizarCartoes(todosOsCartoes);
+      }
+  } catch (error) {
       console.error('Erro ao coletar cartões:', error);
-    };
-  };
+  }
+}
   
 // Função para renderizar os cartões 
 function renderizarCartoes(cartoes) {

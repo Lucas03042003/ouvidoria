@@ -9,7 +9,7 @@ async function expandirCardFinal(cartao) {
   let cliente = cartao.Cliente;
   let data = cartao.Data_comentario;
   let tag = cartao.titulo_tag;
-  let responsavel = cartao.Administrador;
+  let responsavel = cartao.admin_nome;
   let cor_tag = cartao.cor_tag;
   let cor_texto_tag = cartao.cor_texto;
   let comentario = cartao.Comentario;
@@ -48,10 +48,10 @@ async function expandirCardFinal(cartao) {
   configPanel.style.borderRadius = '5px';
   configPanel.style.zIndex = '1001';
 
-  let history = await fetchHistoricoExFin(id_cartao);
-  console.log('teste novo', history)
+  await fetchHistorico(id_cartao);
+  console.log('teste novo', window.todosOsHistoricos)
 
-  const historico = history ? history.map(histo => 
+  const historico = window.todosOsHistoricos ? window.todosOsHistoricos.map(histo => 
     `<p>- ${histo.descricao}</p>`
   ).join('') : '';
 
@@ -92,37 +92,6 @@ async function expandirCardFinal(cartao) {
 
 };
 
-
-async function fetchHistoricoExFin(id_cartao) {
-  try {
-      console.log('Iniciando fetchHistorico para o cartão:', id_cartao);
-
-      const response = await fetch('http://127.0.0.1:5000/ativar-historico-exfin', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json', 
-        },
-        body: JSON.stringify({
-          cardId: id_cartao
-        })
-      });
-
-      if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-      };
-
-      const historicoData = await response.json();
-      console.log('Histórico obtido:', historicoData);
-
-      return historicoData;
-
-  } catch (error) {
-      console.error('Erro ao ativar Histórico:', error);
-      throw error;
-  };
-};
-
-
 async function abrirFinalizados() {
   if (document.getElementById('btn-finalizados').className != 'selecionado') {
     // Atualiza os estilos dos botões
@@ -134,7 +103,8 @@ async function abrirFinalizados() {
     let status = "finalizado";
 
     // Busca os cartões "finalizados"
-    const cartoes = await fetchCartoesExcFin(status);
+    await fetchCartoes(false, status);
+    const cartoes = window.todosOsCartoes;
 
     centro.innerHTML = ``;
 
@@ -169,7 +139,7 @@ async function abrirFinalizados() {
           <p><strong>Conclusão:</strong> ${new Date(
             cartao.Data_conclusao
           ).toLocaleDateString()}</p>
-          <p><strong>Admin:</strong> ${cartao.Administrador}</p>
+          <p><strong>Admin:</strong> ${cartao.admin_nome}</p>
         `;
 
         dupla.appendChild(card);
@@ -200,34 +170,6 @@ function abrirHome() {
   };
 };
 
-async function fetchCartoesExcFin(status) {
-  try {
-    // Definir a URL com o parâmetro de status, se fornecido
-    const url = status 
-      ? `http://127.0.0.1:5000/api/cartoes-exc-fin?status=${encodeURIComponent(status)}`
-      : 'http://127.0.0.1:5000/api/cartoes-exc-fin';
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Erro HTTP! Status: ${response.status}`);
-    };
-
-    const data = await response.json();
-    console.log('Dados recebidos:', data);
-
-    return data;
-
-  } catch (error) {
-    console.error('Erro ao buscar os dados:', error);
-  };
-};
-
 async function abrirExluidos() {
   if (document.getElementById('btn-excluidos').className != 'selecionado') {
     document.getElementById('btn-finalizados').className = 'opcao';
@@ -237,7 +179,8 @@ async function abrirExluidos() {
     let centro = document.getElementById("content-kanban");
     let status = "excluído";
     
-    const cartoes = await fetchCartoesExcFin(status);
+    await fetchCartoes(false, status);
+    const cartoes = window.todosOsCartoes;
     console.log('aqui', cartoes);
 
     centro.innerHTML = ``;
@@ -273,7 +216,7 @@ async function abrirExluidos() {
           <p><strong>Exclusão:</strong> ${new Date(
             cartao.Data_conclusao
           ).toLocaleDateString()}</p>
-          <p><strong>Admin:</strong> ${cartao.Administrador}</p>
+          <p><strong>Admin:</strong> ${cartao.admin_nome}</p>
         `;
 
         dupla.appendChild(card);
@@ -804,12 +747,11 @@ function adicionarNovoUsuario() {
 };
 
 function enviarParaServidorUsers() {
-  const usuariosParaSalvar = todosOsUsuarios.filter(usuario => usuario.permissoes !== 'excluir');
 
   fetch('http://127.0.0.1:5000/salvar-usuarios', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(usuariosParaSalvar)
+      body: JSON.stringify(todosOsUsuarios)
   })
   .then(response => response.json())
   .then(data => {

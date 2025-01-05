@@ -106,6 +106,10 @@ def coletar_cartoes():
     cnx = None
     cursor = None
     try:
+        
+        data = request.json
+        status = data.get('status')
+    
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
 
@@ -117,8 +121,9 @@ def coletar_cartoes():
         LEFT JOIN Fluxo f ON c.Etapa = f.id_fluxo
         LEFT JOIN Tags t ON c.Tag = t.id_tag
         LEFT JOIN Usuarios u ON c.Administrador = u.id_user
+        WHERE c.status = %s;
         """
-        cursor.execute(query)
+        cursor.execute(query, (status,))
         cartoes = cursor.fetchall()
 
         # Converter as datas para string
@@ -263,50 +268,52 @@ def salvar_usuarios():
     cnx = None
     cursor = None
     try:
-        novos_usuarios = request.json
+        usuarios = request.json
+        if not usuarios:
+            return jsonify({"error": "Nenhum dado de usuário fornecido"}), 400
+
         cnx = get_db_connection()
-        cursor = cnx.cursor()
+        cursor = cnx.cursor(dictionary=True)  # Garante que consulte por dicionário
+
+        print(usuarios)
 
         # Iniciar uma transação
         cnx.start_transaction()
 
-        # Armazenar os usuários antigos antes de deletá-los
-        cursor.execute("SELECT * FROM Usuarios")
-        usuarios_antigos = cursor.fetchall()
-
-        # Deletar todos os usuários existentes
-        cursor.execute("DELETE FROM Usuarios")
-
-        # Inserir os novos usuários
-        insert_query = "INSERT INTO Usuarios (id_user, email, permissoes, senha) VALUES (%s, %s, %s, %s)"
-        for usuario in novos_usuarios:
-            cursor.execute(insert_query, (
-                usuario['id_user'],
-                usuario['email'],
-                usuario['permissoes'],
-                usuario['senha']  # Nota: Considere usar hash para senhas em produção
-            ))
+        for usuario in usuarios:
+            if usuario.get('permissoes') == "excluir":
+                cursor.execute("DELETE FROM Usuarios WHERE id_user = %s", (usuario.get("id_user"),))
+            else:
+                cursor.execute("SELECT * FROM Usuarios WHERE id_user = %s", (usuario.get("id_user"),))
+                old_user = cursor.fetchone()
+                if old_user:
+                    fields_to_update = []
+                    values = []
+                    if old_user['email'] != usuario['email']:
+                        fields_to_update.append("email = %s")
+                        values.append(usuario['email'])
+                    if old_user["permissoes"] != usuario['permissoes']:
+                        fields_to_update.append("permissoes = %s")
+                        values.append(usuario['permissoes'])
+                    if old_user["senha"] != usuario['senha']:
+                        fields_to_update.append("senha = %s")
+                        values.append(usuario['senha'])
+                    
+                    if fields_to_update:
+                        values.append(usuario.get("id_user"))
+                        query = "UPDATE Usuarios SET " + ", ".join(fields_to_update) + " WHERE id_user = %s"
+                        cursor.execute(query, tuple(values))
 
         # Se chegou até aqui sem erros, commit da transação
         cnx.commit()
-        
+
         return jsonify({"message": "Usuários atualizados com sucesso!"}), 200
 
     except Exception as e:
         # Se ocorrer qualquer erro, fazer rollback
         if cnx:
             cnx.rollback()
-            
-            # Tentar restaurar os usuários antigos
-            try:
-                for usuario in usuarios_antigos:
-                    cursor.execute(insert_query, usuario)
-                cnx.commit()
-            except:
-                # Se falhar ao restaurar, pelo menos o banco estará vazio,
-                # que é melhor do que ter dados parcialmente atualizados
-                cnx.rollback()
-        
+
         return jsonify({"error": str(e)}), 500
 
     finally:
@@ -571,36 +578,6 @@ def atualizar_responsavel():
             cursor.close()
         if cnx:
             cnx.close()
-            
-@app.route('/api/cartoes-exc-fin', methods=['GET'])
-def fetch_cartoes_exc_fin():
-    try:
-        # Obter o parâmetro de status da URL (valor padrão: None)
-        status = request.args.get('status', None)
-
-        # Conexão com o banco de dados
-        cnx = get_db_connection()
-        cursor = cnx.cursor(dictionary=True)
-
-        # Query SQL com filtro de status, se fornecido
-        if status:
-            query = "SELECT * FROM CartoesExcFin WHERE status = %s"
-            cursor.execute(query, (status,))
-        else:
-            query = "SELECT * FROM CartoesExcFin"
-            cursor.execute(query)
-
-        # Obter os resultados
-        resultado = cursor.fetchall()
-
-        # Fechar conexões
-        cursor.close()
-        cnx.close()
-
-        # Retornar os resultados como JSON
-        return jsonify(resultado), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
     
 if __name__ == '__main__':
     app.run(debug=True)
