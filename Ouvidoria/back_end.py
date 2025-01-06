@@ -578,6 +578,42 @@ def atualizar_responsavel():
             cursor.close()
         if cnx:
             cnx.close()
+
+@app.route('/atualizar-status', methods=['POST'])
+def atualizar_status():
+    try:
+        data = request.json
+        card_id = data.get('cardId')
+        status = data.get('status')
+        titulo = data.get('titulo')
+        cor_tag = data.get('cor_tag')
+        cor_texto = data.get('cor_texto')
+
+        # Conexão com o banco de dados
+        cnx = get_db_connection()
+        cursor = cnx.cursor(dictionary=True)
+
+        # Inserir no banco de dados
+        query = "UPDATE Cartoes SET status = %s, titulo_tag = %s, cor_tag = %s, cor_texto = %s where ID_Cartao = %s;"
+        cursor.execute(query, (status,titulo,cor_tag,cor_texto,card_id))
+        
+        descricao = f"Esse cartão foi {status} no dia {datetime.now().date()}."
+        query_historico = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s,  CURDATE())"
+        cursor.execute(query_historico, (card_id, descricao))
+        
+        # Confirmar a transação
+        cnx.commit()
+
+        # Fechar o cursor e a conexão
+        cursor.close()
+        cnx.close()
+
+        # Retornar uma resposta de sucesso
+        return jsonify({"success": True, "message": "Histórico atualizado com sucesso"}), 200
+
+    except Exception as e:
+        # Tratar erros
+        return jsonify({"success": False, "error": str(e)}), 500
     
 if __name__ == '__main__':
     app.run(debug=True)

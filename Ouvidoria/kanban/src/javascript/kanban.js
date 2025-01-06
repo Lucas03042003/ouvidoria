@@ -177,17 +177,57 @@ function fecharCard() {
     };
 };
   
-function confirmarCancelar() {
+async function confirmarCancelar(id_cartao, id_fluxo, titulo, cor_tag, cor_texto) {
     let confirmar = confirm("Você irá deletar esse cartão. Deseja mesmo continuar?");
     if (confirmar) {
       fecharCard();
+      await mudarStatus(id_cartao, "excluído", titulo, cor_tag, cor_texto);
+      deletarUI(id_cartao, id_fluxo);
     };
+};
+
+async function mudarStatus(id_cartao, status, titulo, cor_tag, cor_texto) {
+  try {
+    console.log('Iniciando mudarStatus para o cartão:', id_cartao);
+
+    const response = await fetch('http://127.0.0.1:5000/atualizar-status', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json', 
+      },
+      body: JSON.stringify({
+        cardId: id_cartao,
+        status: status,
+        titulo: titulo,
+        cor_tag: cor_tag,
+        cor_texto: cor_texto
+      })
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    };
+
+  } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      throw error;
+  };
+}
+
+function deletarUI(id_cartao, id_fluxo) {
+
+  const colunaKanban = document.querySelector(`.kanban-column[data-id="${id_fluxo}"]`);
+  const kanbanCard = colunaKanban.querySelector('.kanban-cards');
+  const elemento = document.querySelector(`.kanban-card[data-id="${id_cartao}"]`);
+
+  kanbanCard.removeChild(elemento);
 };
 
 async function expandirCard(id_cartao) {
 
   const cartao = todosOsCartoes.find(cartao => cartao.ID_Cartao === id_cartao);
-  
+
+  let id_fluxo = cartao.id_fluxo;
   let cliente = cartao.Cliente;
   let data = cartao.Data_comentario;
   let tag = cartao.tag_titulo;
@@ -289,7 +329,7 @@ async function expandirCard(id_cartao) {
       </div>
       <div class="action-buttons">
         <a class="btn btn-check" href="#" title="Finalizar">✔</a>
-        <a class="btn btn-cancel" onclick="confirmarCancelar()" href="#" title="Excluir">✖</a>
+        <a class="btn btn-cancel" onclick="confirmarCancelar(${id_cartao}, ${id_fluxo})" href="#" title="Excluir">✖</a>
       </div>
     </main>
   `;
