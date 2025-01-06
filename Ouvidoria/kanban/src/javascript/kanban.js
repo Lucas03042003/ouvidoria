@@ -177,11 +177,19 @@ function fecharCard() {
     };
 };
   
-async function confirmarCancelar(id_cartao, id_fluxo, titulo, cor_tag, cor_texto) {
-    let confirmar = confirm("Você irá deletar esse cartão. Deseja mesmo continuar?");
+async function confirmarMudar(id_cartao, id_fluxo, titulo, cor_tag, cor_texto, status) {
+    
+    let texto = "Você irá finalizar as atividades com esse cartão. Deseja mesmo continuar?";
+  
+    if (status == "excluído") {
+      texto = "Você irá deletar esse cartão. Deseja mesmo continuar?";
+    };
+
+    confirmar = confirm(texto);
+
     if (confirmar) {
       fecharCard();
-      await mudarStatus(id_cartao, "excluído", titulo, cor_tag, cor_texto);
+      await mudarStatus(id_cartao, status, titulo, cor_tag, cor_texto);
       deletarUI(id_cartao, id_fluxo);
     };
 };
@@ -328,8 +336,8 @@ async function expandirCard(id_cartao) {
         </div>
       </div>
       <div class="action-buttons">
-        <a class="btn btn-check" href="#" title="Finalizar">✔</a>
-        <a class="btn btn-cancel" onclick="confirmarCancelar(${id_cartao}, ${id_fluxo}, '${tag}', '${cor_tag}', '${cor_texto_tag}')" href="#" title="Excluir">✖</a>
+        <a class="btn btn-check" onclick="confirmarMudar(${id_cartao}, ${id_fluxo}, '${tag}', '${cor_tag}', '${cor_texto_tag}', 'finalizado')" title="Finalizar">✔</a>
+        <a class="btn btn-cancel" onclick="confirmarMudar(${id_cartao}, ${id_fluxo}, '${tag}', '${cor_tag}', '${cor_texto_tag}', 'excluído')" title="Excluir">✖</a>
       </div>
     </main>
   `;
