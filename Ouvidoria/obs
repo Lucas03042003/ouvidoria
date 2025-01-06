@@ -1,0 +1,16 @@
+1. Há um erro nas tags quando um cartão normal é excluído ou finalizado, tentei adicionar mais informações sobre as tags no expandir cards para resolver o problema. 
+Mas aparece como se o formato fosse inadequado.
+
+2. Falta permitir conversão de normal para finalizado.
+
+3. Depois é bom eu fazer vários testes com diferentes cartões para testar a interface.
+
+4. Devo criar uma área de login.
+4.1 Devo criar um database para cada conjunto de usuários.
+4.2 Os grupos de usuários devem ser controlados em um banco de dados.
+4.2.1 obs: seria bom talvez não poder mudar o email dos usuários, para então conectar o login com o google sem problemas.
+
+5. Fazer área de pagamento do site.
+5.1. Automatizar controle do pagamento para liberar ou bloquear acessos.
+
+6. Adicionar filtros.
