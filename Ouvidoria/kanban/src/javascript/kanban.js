@@ -329,7 +329,7 @@ async function expandirCard(id_cartao) {
       </div>
       <div class="action-buttons">
         <a class="btn btn-check" href="#" title="Finalizar">✔</a>
-        <a class="btn btn-cancel" onclick="confirmarCancelar(${id_cartao}, ${id_fluxo})" href="#" title="Excluir">✖</a>
+        <a class="btn btn-cancel" onclick="confirmarCancelar(${id_cartao}, ${id_fluxo}, '${tag}', '${cor_tag}', '${cor_texto_tag}')" href="#" title="Excluir">✖</a>
       </div>
     </main>
   `;
