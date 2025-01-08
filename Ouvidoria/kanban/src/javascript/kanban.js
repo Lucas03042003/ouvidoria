@@ -177,7 +177,12 @@ function fecharCard() {
     };
 };
   
-async function confirmarMudar(id_cartao, id_fluxo, titulo, cor_tag, cor_texto, status) {
+async function confirmarMudar(id_cartao, id_fluxo, status) {
+  
+    const cartao = todosOsCartoes.find(cartao => cartao.ID_Cartao === id_cartao);
+    let cor_tag = cartao.cor_tag;
+    let cor_texto = cartao.cor_texto_tag;
+    let titulo = cartao.tag_titulo;
     
     let texto = "Você irá finalizar as atividades com esse cartão. Deseja mesmo continuar?";
   
@@ -336,8 +341,8 @@ async function expandirCard(id_cartao) {
         </div>
       </div>
       <div class="action-buttons">
-        <a class="btn btn-check" onclick="confirmarMudar(${id_cartao}, ${id_fluxo}, '${tag}', '${cor_tag}', '${cor_texto_tag}', 'finalizado')" title="Finalizar">✔</a>
-        <a class="btn btn-cancel" onclick="confirmarMudar(${id_cartao}, ${id_fluxo}, '${tag}', '${cor_tag}', '${cor_texto_tag}', 'excluído')" title="Excluir">✖</a>
+        <a class="btn btn-check" onclick="confirmarMudar(${id_cartao}, ${id_fluxo}, 'finalizado')" title="Finalizar">✔</a>
+        <a class="btn btn-cancel" onclick="confirmarMudar(${id_cartao}, ${id_fluxo}, 'excluído')" title="Excluir">✖</a>
       </div>
     </main>
   `;
@@ -464,16 +469,18 @@ async function atualizarNovaTag(id_cartao) {
   })
   .then(data => {
     console.log('Responsável atualizado com sucesso:', data.message);
+    titulo = data['newTag'];
+
+    todosOsCartoes = todosOsCartoes.map(cartao => {
+      if (cartao.ID_Cartao === id_cartao) {
+          return { ...cartao, tag_titulo: titulo, cor_tag: backColor, cor_texto_tag: colorFont};
+      }
+      return cartao;
+    });
+
   })
   .catch(error => {
     console.error('Erro ao atualizar responsável do cartão:', error);
-  });
-
-  todosOsCartoes = todosOsCartoes.map(cartao => {
-    if (cartao.ID_Cartao === id_cartao) {
-        return { ...cartao, tag_titulo: newTag, cor_tag: backColor, cor_texto_tag: colorFont};
-    }
-    return cartao;
   });
 
   adicionarTagHistorico(newTag);
