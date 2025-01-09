@@ -69,7 +69,7 @@ async function expandirCardFinal(cartao, stat) {
           </a>
           <p>Cliente: ${cliente}</p>
           <p>Data do comentário: ${data}</p>
-          <p>${status}: ${cartao.Data_conclusao}</p>
+          <p>${status}: ${new Date(cartao.Data_conclusao).toISOString().split('T')[0]}</p>
           <p>Responsável: ${responsavel}</p>
         </div>
         <div class="informacoes">
@@ -138,7 +138,7 @@ async function abrirFinalizados() {
           ).toLocaleDateString()}</p>
           <p><strong>Conclusão:</strong> ${new Date(
             cartao.Data_conclusao
-          ).toLocaleDateString()}</p>
+          ).toISOString().split('T')[0]}</p>
           <p><strong>Admin:</strong> ${cartao.admin_nome}</p>
         `;
 

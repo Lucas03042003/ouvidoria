@@ -588,18 +588,19 @@ def atualizar_status():
         titulo = data.get('titulo')
         cor_tag = data.get('cor_tag')
         cor_texto = data.get('cor_texto')
+        dia = datetime.now().date()
 
         # Conexão com o banco de dados
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
 
         # Inserir no banco de dados
-        query = "UPDATE Cartoes SET status = %s, titulo_tag = %s, cor_tag = %s, cor_texto = %s where ID_Cartao = %s;"
-        cursor.execute(query, (status,titulo,cor_tag,cor_texto,card_id))
+        query = "UPDATE Cartoes SET status = %s, titulo_tag = %s, cor_tag = %s, cor_texto = %s, Data_conclusao = %s where ID_Cartao = %s;"
+        cursor.execute(query, (status,titulo,cor_tag,cor_texto, dia, card_id))
         
         descricao = f"Esse cartão foi {status} no dia {datetime.now().date()}."
-        query_historico = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s,  CURDATE())"
-        cursor.execute(query_historico, (card_id, descricao))
+        query_historico = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
+        cursor.execute(query_historico, (card_id, descricao, dia))
         
         # Confirmar a transação
         cnx.commit()
