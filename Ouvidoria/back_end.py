@@ -115,7 +115,7 @@ def coletar_cartoes():
 
         query = """
         SELECT c.ID_Cartao, c.Cliente, c.Data_comentario, c.Data_conclusao, c.titulo_tag as ctitulo_tag, c.cor_tag as ccor_tag, c.cor_texto as ccor_texto,c.Comentario, 
-               c.Etapa, c.Tag, c.Administrador, f.nome as nome_fluxo, f.id_fluxo, t.titulo as tag_titulo, 
+               c.Etapa, c.Tag, c.Administrador, c.Nome_admin as nomeAdmin, f.nome as nome_fluxo, f.id_fluxo, t.titulo as tag_titulo, 
                t.cor_tag, t.cor_texto as cor_texto_tag, u.email as admin_nome
         FROM Cartoes c
         LEFT JOIN Fluxo f ON c.Etapa = f.id_fluxo
@@ -537,8 +537,8 @@ def atualizar_responsavel():
         cnx.start_transaction()
 
         # Atualizar a etapa do cartão
-        update_query = "UPDATE Cartoes SET Administrador = (select id_user from Usuarios where email=%s) where ID_Cartao = %s;"
-        cursor.execute(update_query, (new_responsavel, card_id))
+        update_query = "UPDATE Cartoes SET Administrador = (select id_user from Usuarios where email=%s), Nome_admin = (select id_user from Usuarios where email=%s) where ID_Cartao = %s;"
+        cursor.execute(update_query, (new_responsavel, new_responsavel, card_id))
 
         # Verificar se a atualização foi bem-sucedida
         if cursor.rowcount == 0:
@@ -581,13 +581,14 @@ def atualizar_responsavel():
 
 @app.route('/atualizar-status', methods=['POST'])
 def atualizar_status():
-    try:
+    # try:
         data = request.json
         card_id = data.get('cardId')
         status = data.get('status')
         titulo = data.get('titulo')
         cor_tag = data.get('cor_tag')
         cor_texto = data.get('cor_texto')
+        Nome_admin = data.get('Nome_admin')
         dia = datetime.now().date()
 
         # Conexão com o banco de dados
@@ -595,8 +596,8 @@ def atualizar_status():
         cursor = cnx.cursor(dictionary=True)
 
         # Inserir no banco de dados
-        query = "UPDATE Cartoes SET status = %s, titulo_tag = %s, cor_tag = %s, cor_texto = %s, Data_conclusao = %s where ID_Cartao = %s;"
-        cursor.execute(query, (status,titulo,cor_tag,cor_texto, dia, card_id))
+        query = "UPDATE Cartoes SET status = %s, titulo_tag = %s, cor_tag = %s, cor_texto = %s, Data_conclusao = %s, Nome_admin = %s, Tag = null, Administrador = null where ID_Cartao = %s;"
+        cursor.execute(query, (status,titulo,cor_tag,cor_texto, dia, Nome_admin, card_id))
         
         descricao = f"Esse cartão foi {status} no dia {datetime.now().date()}."
         query_historico = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
@@ -612,9 +613,10 @@ def atualizar_status():
         # Retornar uma resposta de sucesso
         return jsonify({"success": True, "message": "Histórico atualizado com sucesso"}), 200
 
-    except Exception as e:
-        # Tratar erros
-        return jsonify({"success": False, "error": str(e)}), 500
+    # except Exception as e:
+    #     # Tratar erros
+    #     print(e)
+    #     return jsonify({"success": False, "error": str(e)}), 500
     
 if __name__ == '__main__':
     app.run(debug=True)

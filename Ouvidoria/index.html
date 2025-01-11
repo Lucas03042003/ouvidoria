@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    <link rel="stylesheet" href="index.css" media="screen">
+    <link rel="stylesheet" href="css/index.css" media="screen">
+    <link rel="stylesheet" href="css/kanban.css" media="screen">
 <head>
     <title>Página Inicial</title>
 </head>
@@ -17,14 +18,27 @@
             <div class="cabecalho">
                 <img class="img-login" src="galeria/img_login.png" alt="Imagem de Login" id="btn-login"/>
             </div>
-            <div class="kanban-div" id="content-kanban"></div>
+            <div class="kanban-div" id="content-kanban">
+                <div class="kanban" id="kanban">
+                </div>
+            </div>
         </div>
     </div>
     
-    <script src="index.js"></script>
 </body>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>$('#content-kanban').load('kanban.html');</script>
-
+<script src="javascripts/coletarInformacoes.js"></script>
+<script src="javascripts/atualizarInformações.js"></script>
+<script src="javascripts/editarConfig.js"></script>
+<script src="javascripts/abrirFinais.js"></script>
+<script src="javascripts/ativarKanban.js"></script>
+<script>
+    fetchKanban();
+    document.getElementById('config').addEventListener('click', ativarConfig);
+    document.getElementById('menuBtn').addEventListener('click', desativarMenu);
+    document.getElementById('btn-finalizados').addEventListener('click', abrirFinalizados);
+    document.getElementById('btn-home').addEventListener('click', abrirHome);
+    document.getElementById('btn-excluidos').addEventListener('click', abrirExluidos);
+</script>
 </html>
