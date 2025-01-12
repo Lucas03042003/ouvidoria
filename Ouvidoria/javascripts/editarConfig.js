@@ -434,15 +434,17 @@ window.renderizarTags = function(todasAsTags) {
     // Adicionar event listeners para os color pickers e botões de exclusão
     todasAsTags.forEach(({ id_tag }) => {
         atualizarCores(id_tag);
-        adicionarEventoExclusao(id_tag, todasAsTags);
+        adicionarEventoExclusao(id_tag, window.todasAsTags);
     });
   
     atualizarTituloTags();
 };
   
-function adicionarEventoExclusao(id_tag, todasAsTags) {
+async function adicionarEventoExclusao(id_tag, todasAsTags) {
     const tagItem = document.querySelector(`.tag-item[data-id="${id_tag}"]`);
     const deleteButton = tagItem.querySelector('.delete-tag');
+
+    const todosOsCartoes = await fetchCartoes(false, "normal");
     
     deleteButton.addEventListener('click', function() {
       console.log('Tentando excluir tag com id:', id_tag);
