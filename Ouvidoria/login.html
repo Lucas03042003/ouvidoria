@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- ===== CSS ===== -->
+        <link rel="stylesheet" href="css/login.css">
+
+        <!-- ===== BOX ICONS ===== -->
+        <link href='https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css' rel='stylesheet'>
+
+        <title>Login form responsive</title>  
+    </head>
+    <body>
+
+        <div class="l-form">
+            <div class="exemplo__kanban">
+                <main class="kanban">
+                    <!-- COLUMN 1 -->
+                    <div class="kanban-column" data-id="1">
+                        <div class="kanban-title">
+                            <h2>
+                                Início
+                            </h2>
+            
+                            <button class="add-card">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+            
+                        <div class="kanban-cards">
+                            <div class="kanban-card" draggable="true">
+                                <div class="badge medium">
+                                    <span>Média prioridade</span>
+                                </div>
+                                
+                                <div class="card-text">
+                                    <a>Cliente A</a>
+                                    <a>2025-01-01</a>
+                                </div>
+            
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- COLUMN 2 -->
+                    <div class="kanban-column" data-id="2">
+                        <div class="kanban-title">
+                            <h2>
+                                Encaminhamento
+                            </h2>
+            
+                            <button class="add-card">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+            
+                        <div class="kanban-cards">
+                            <div class="kanban-card" draggable="true">
+                                <div class="badge high">
+                                    <span>
+                                        Alta prioridade
+                                    </span>
+                                </div>
+            
+                                <div class="card-text">
+                                    <a>Cliente B</a>
+                                    <a>2025-01-01</a>
+                                </div>
+            
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- COLUMN 3 -->
+                    <div class="kanban-column" data-id="3">
+                        <div class="kanban-title">
+                            <h2>
+                                Conclusão
+                            </h2>
+            
+                            <button class="add-card">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+            
+                        <div class="kanban-cards">
+                            <div class="kanban-card" draggable="true">
+                                <div class="badge low">
+                                    <span>
+                                        Baixa prioridade
+                                    </span>
+                                </div>
+            
+                                <div class="card-text">
+                                    <a>Cliente C</a>
+                                    <a>2025-01-01</a>
+                                </div>
+            
+                            </div>
+                        </div>
+                    </div>
+            
+                    <script src="javascripts\exKanban.js"></script>
+                </main>
+            </div>
+            <div class="shape1"></div>
+            <div class="shape2"></div>
+
+            <div class="form">
+
+                <form action="" class="form__content">
+                    <h1 class="form__title">Bem-vindo</h1>
+
+                    <div class="form__div form__div-one">
+                        <div class="form__icon">
+                            <i class='bx bx-user-circle'></i>
+                        </div>
+
+                        <div class="form__div-input">
+                            <label for="" class="form__label">Usuário</label>
+                            <input type="text" class="form__input">
+                        </div>
+                    </div>
+
+                    <div class="form__div">
+                        <div class="form__icon">
+                            <i class='bx bx-lock' ></i>
+                        </div>
+
+                        <div class="form__div-input">
+                            <label for="" class="form__label">Senha</label>
+                            <input type="password" class="form__input">
+                        </div>
+                    </div>
+                    <a href="#" class="form__forgot">Esqueceu a senha?</a>
+
+                    <input type="submit" class="form__button" value="Login" >
+
+                    <div class="form__social">
+                        <span class="form__social-text">Login com</span>
+
+                        <a href="#" class="form__social-icon"><i class='bx bxl-facebook' ></i></a>
+                        <a href="#" class="form__social-icon"><i class='bx bxl-google' ></i></a>
+                        <a href="#" class="form__social-icon"><i class='bx bxl-instagram' ></i></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== MAIN JS ===== -->
+        <script src="javascripts/login.js"></script>
+    </body>
+
+</html>
