@@ -581,7 +581,7 @@ def atualizar_responsavel():
 
 @app.route('/atualizar-status', methods=['POST'])
 def atualizar_status():
-    # try:
+    try:
         data = request.json
         card_id = data.get('cardId')
         status = data.get('status')
@@ -613,10 +613,31 @@ def atualizar_status():
         # Retornar uma resposta de sucesso
         return jsonify({"success": True, "message": "Histórico atualizado com sucesso"}), 200
 
-    # except Exception as e:
-    #     # Tratar erros
-    #     print(e)
-    #     return jsonify({"success": False, "error": str(e)}), 500
+    except Exception as e:
+        # Tratar erros
+        print(e)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/verificar-login', methods=['POST'])
+def verificar_login():
+
+        # Obtém os dados do corpo da requisição
+        data = request.json
+        email = data.get('email')
+        senha = data.get('senha')
+
+        cnx = get_db_connection()
+        cursor = cnx.cursor(dictionary=True)
+        query = "SELECT * FROM usuarios WHERE email = %s AND senha = %s"
+        cursor.execute(query, (email, senha))
+        resultado = cursor.fetchall()
+        cursor.close()
+        cnx.close()
+        
+        if len(resultado) > 0:
+            return jsonify({"status":True})
+        else:
+            return jsonify({"status":False})
     
 if __name__ == '__main__':
     app.run(debug=True)
