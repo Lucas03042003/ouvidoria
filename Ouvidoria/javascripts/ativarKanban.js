@@ -33,7 +33,6 @@ function ativarMenu(btn_home_class, btn_final_class, btn_excl_class) {
       <a href="#" class="selecionado" id="btn-home">Home</a>
       <a href="#" class="opcao" id="btn-finalizados">Finalizados</a>
       <a href="#" class="opcao" id="btn-excluidos">Excluídos</a>
-      <img class="img-config" src="galeria/config.png" alt="Imagem de config" id="config"/>
       `;
     };    
     if (btn_final_class == 'selecionado') {
@@ -59,8 +58,19 @@ function ativarMenu(btn_home_class, btn_final_class, btn_excl_class) {
     docker.removeChild(content2);
     docker.insertBefore(menu, content);
 
+    if (permissao == "admin") {
+      const img = document.createElement("img");
+      img.className = "img-config";
+      img.src = "galeria/config.png";
+      img.id = "config";
+      img.alt = "Imagem de config";
+      img.title = "Configurações";
+  
+      document.getElementById("menu").appendChild(img);
+      document.getElementById('config').addEventListener('click', ativarConfig);
+  }
+
     document.getElementById('menuBtn').addEventListener('click', desativarMenu);
-    document.getElementById('config').addEventListener('click', ativarConfig);
     document.getElementById('btn-finalizados').addEventListener('click', abrirFinalizados);
     document.getElementById('btn-home').addEventListener('click', abrirHome);
     document.getElementById('btn-excluidos').addEventListener('click', abrirExluidos);

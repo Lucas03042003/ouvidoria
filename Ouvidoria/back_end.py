@@ -633,9 +633,9 @@ def verificar_login():
         resultado = cursor.fetchall()
         cursor.close()
         cnx.close()
-        
+
         if len(resultado) > 0:
-            return jsonify({"status":True})
+            return jsonify({"status":True, "permissoes":resultado[0]["permissoes"]})
         else:
             return jsonify({"status":False})
     

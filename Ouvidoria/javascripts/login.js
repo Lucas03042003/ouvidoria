@@ -35,7 +35,8 @@ window.iniciarLogin = async function () {
   
         const resultado = await response.json();
 
-        if (resultado.status) {    
+        if (resultado.status) { 
+            window.permissao = resultado.permissoes;
             iniciar();
         } else {
             alert('O usuário ou senha está errado(a). Por favor, tente novamente!');
@@ -55,7 +56,6 @@ window.iniciar = async function () {
             <a href="#" class="selecionado" id="btn-home">Home</a>
             <a href="#" class="opcao" id="btn-finalizados">Finalizados</a>
             <a href="#" class="opcao" id="btn-excluidos">Excluídos</a>
-            <img class="img-config" src="galeria/config.png" id="config" alt="Imagem de config" title="Configurações"/>
         </aside>
         <div class="content" id="content">
             <div class="cabecalho">
@@ -69,8 +69,19 @@ window.iniciar = async function () {
     </div>
     `;
 
+    if (permissao == "admin") {
+        const img = document.createElement("img");
+        img.className = "img-config";
+        img.src = "galeria/config.png";
+        img.id = "config";
+        img.alt = "Imagem de config";
+        img.title = "Configurações";
+    
+        document.getElementById("menu").appendChild(img);
+        document.getElementById('config').addEventListener('click', ativarConfig);
+    }
+
     await fetchKanban();
-    document.getElementById('config').addEventListener('click', ativarConfig);
     document.getElementById('menuBtn').addEventListener('click', desativarMenu);
     document.getElementById('btn-finalizados').addEventListener('click', abrirFinalizados);
     document.getElementById('btn-home').addEventListener('click', abrirHome);
