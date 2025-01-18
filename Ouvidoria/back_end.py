@@ -103,27 +103,47 @@ def ativar_historico_exfin():
 
 @app.route('/coletar-cartoes', methods=['POST'])
 def coletar_cartoes():
-    cnx = None
-    cursor = None
-    try:
+    # cnx = None
+    # cursor = None
+    # try:
         
         data = request.json
         status = data.get('status')
+        email = data.get('email')
     
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
 
-        query = """
-        SELECT c.ID_Cartao, c.Cliente, c.Data_comentario, c.Data_conclusao, c.titulo_tag as ctitulo_tag, c.cor_tag as ccor_tag, c.cor_texto as ccor_texto,c.Comentario, 
-               c.Etapa, c.Tag, c.Administrador, c.Nome_admin as nomeAdmin, f.nome as nome_fluxo, f.id_fluxo, t.titulo as tag_titulo, 
-               t.cor_tag, t.cor_texto as cor_texto_tag, u.email as admin_nome
-        FROM Cartoes c
-        LEFT JOIN Fluxo f ON c.Etapa = f.id_fluxo
-        LEFT JOIN Tags t ON c.Tag = t.id_tag
-        LEFT JOIN Usuarios u ON c.Administrador = u.id_user
-        WHERE c.status = %s;
-        """
-        cursor.execute(query, (status,))
+        query = "SELECT * FROM usuarios WHERE email = %s"
+        cursor.execute(query, (email,))
+        resultado = cursor.fetchall()
+
+        if resultado[0]["permissoes"] == "user" and status =="normal":
+            query = """
+            SELECT c.ID_Cartao, c.Cliente, c.Data_comentario, c.Data_conclusao, c.titulo_tag as ctitulo_tag, c.cor_tag as ccor_tag, c.cor_texto as ccor_texto,c.Comentario, 
+                   c.Etapa, c.Tag, c.Administrador, c.Nome_admin as nomeAdmin, f.nome as nome_fluxo, f.id_fluxo, t.titulo as tag_titulo, 
+                   t.cor_tag, t.cor_texto as cor_texto_tag, u.email as admin_nome
+            FROM Cartoes c
+            LEFT JOIN Fluxo f ON c.Etapa = f.id_fluxo
+            LEFT JOIN Tags t ON c.Tag = t.id_tag
+            LEFT JOIN Usuarios u ON c.Administrador = u.id_user
+            WHERE c.status = %s AND u.email = %s;
+            """      
+            cursor.execute(query, (status,email,))
+
+        else:
+            query = """
+            SELECT c.ID_Cartao, c.Cliente, c.Data_comentario, c.Data_conclusao, c.titulo_tag as ctitulo_tag, c.cor_tag as ccor_tag, c.cor_texto as ccor_texto,c.Comentario, 
+                   c.Etapa, c.Tag, c.Administrador, c.Nome_admin as nomeAdmin, f.nome as nome_fluxo, f.id_fluxo, t.titulo as tag_titulo, 
+                   t.cor_tag, t.cor_texto as cor_texto_tag, u.email as admin_nome
+            FROM Cartoes c
+            LEFT JOIN Fluxo f ON c.Etapa = f.id_fluxo
+            LEFT JOIN Tags t ON c.Tag = t.id_tag
+            LEFT JOIN Usuarios u ON c.Administrador = u.id_user
+            WHERE c.status = %s;
+            """
+            cursor.execute(query, (status,))
+
         cartoes = cursor.fetchall()
 
         # Converter as datas para string
@@ -132,19 +152,19 @@ def coletar_cartoes():
 
         return jsonify(cartoes), 200
 
-    except mysql.connector.Error as e:
-        print(f"Database error: {e}")
-        return jsonify({"error": f"Erro de banco de dados: {str(e)}"}), 500
+    # except mysql.connector.Error as e:
+    #     print(f"Database error: {e}")
+    #     return jsonify({"error": f"Erro de banco de dados: {str(e)}"}), 500
 
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        return jsonify({"error": f"Erro inesperado: {str(e)}"}), 500
+    # except Exception as e:
+    #     print(f"Unexpected error: {e}")
+    #     return jsonify({"error": f"Erro inesperado: {str(e)}"}), 500
 
-    finally:
-        if cursor:
-            cursor.close()
-        if cnx:
-            cnx.close()
+    # finally:
+    #     if cursor:
+    #         cursor.close()
+    #     if cnx:
+    #         cnx.close()
 
 @app.route('/salvar-fluxos', methods=['POST'])
 def salvar_fluxos():

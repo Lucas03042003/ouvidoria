@@ -23,7 +23,7 @@ window.fetchCartoes = async function(renderizar, status) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ status: status }) 
+            body: JSON.stringify({ status: status, email:window.email})
         });
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
