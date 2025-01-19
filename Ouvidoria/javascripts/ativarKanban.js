@@ -245,8 +245,8 @@ const expandirCard = async function(id_cartao) {
     todasAsTags = await fetchTags(false);
     console.log(todasAsTags);
 
-    const responsaveisOptions = `${email}`;
-    const responsavalSelect = `<a id="responsavel-select">${responsaveisOptions}</a>`;
+    let responsaveisOptions = `${email}`;
+    let responsavalSelect = `<a id="responsavel-select">${responsaveisOptions}</a>`;
     if (window.permissao == "admin") {
       responsaveisOptions = todosOsUsuarios ? todosOsUsuarios.map(user => 
           `<option value="${user.id_user}" ${user.email === responsavel ? 'selected' : ''}>${user.email}</option>`
