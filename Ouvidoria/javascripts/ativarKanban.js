@@ -244,11 +244,20 @@ const expandirCard = async function(id_cartao) {
   
     todasAsTags = await fetchTags(false);
     console.log(todasAsTags);
-  
-    // Criar o select de responsáveis
-    const responsaveisOptions = todosOsUsuarios ? todosOsUsuarios.map(user => 
-        `<option value="${user.id_user}" ${user.email === responsavel ? 'selected' : ''}>${user.email}</option>`
-    ).join('') : '';
+
+    const responsaveisOptions = `${email}`;
+    const responsavalSelect = `<a id="responsavel-select">${responsaveisOptions}</a>`;
+    if (window.permissao == "admin") {
+      responsaveisOptions = todosOsUsuarios ? todosOsUsuarios.map(user => 
+          `<option value="${user.id_user}" ${user.email === responsavel ? 'selected' : ''}>${user.email}</option>`
+      ).join('') : '';
+
+      responsavalSelect = `
+        <select id="responsavel-select" style="background-color: transparent; color: inherit; border: 1px solid #807E7E;">
+          ${responsaveisOptions}
+        </select>
+      `;
+    };
   
     const tagsOptions = todasAsTags ? todasAsTags.map(tagItem => 
       `<option value="${tagItem.id_tag}" id="TagItem${tagItem.id_tag}"
@@ -283,9 +292,7 @@ const expandirCard = async function(id_cartao) {
             <p>Data do comentário: ${data}</p>
             <p>
               Responsável:
-              <select id="responsavel-select" style="background-color: transparent; color: inherit; border: 1px solid #807E7E;">
-                ${responsaveisOptions}
-              </select>
+              ${responsavalSelect}
             </p>
           </div>
           <div class="informacoes">
