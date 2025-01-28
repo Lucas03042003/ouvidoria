@@ -49,6 +49,8 @@ window.abrirFinalizados = async function() {
         list.appendChild(dupla);
   
         par.forEach(cartao=>{
+          let nomeSimplificado = String(cartao.nomeAdmin).slice(0,10).concat("...")
+
           let card = document.createElement('div');
           card.className = "finalizados-cards";
           card.innerHTML = `
@@ -56,14 +58,13 @@ window.abrirFinalizados = async function() {
               <span>${cartao.ctitulo_tag || 'Sem Tag'}</span>
             </div>
             <p><strong>Cliente:</strong> ${cartao.Cliente}</p>
-            <p><strong>Tema:</strong> ${cartao.Comentario}</p>
             <p><strong>Data:</strong> ${new Date(
               cartao.Data_comentario
             ).toLocaleDateString()}</p>
             <p><strong>Conclusão:</strong> ${new Date(
               cartao.Data_conclusao
             ).toISOString().split('T')[0]}</p>
-            <p><strong>Admin:</strong> ${cartao.nomeAdmin}</p>
+            <p><strong>Admin:</strong> ${nomeSimplificado}</p>
           `;
   
           dupla.appendChild(card);
@@ -110,6 +111,8 @@ window.abrirExluidos = async function() {
         list.appendChild(dupla);
   
         par.forEach(cartao=>{
+          let nomeSimplificado = String(cartao.nomeAdmin).slice(0,10).concat("...")
+
           let card = document.createElement('div');
           card.className = "finalizados-cards";
           card.innerHTML = `
@@ -117,14 +120,13 @@ window.abrirExluidos = async function() {
               <span>${cartao.ctitulo_tag || 'Sem Tag'}</span>
             </div>
             <p><strong>Cliente:</strong> ${cartao.Cliente}</p>
-            <p><strong>Tema:</strong> ${cartao.Comentario}</p>
             <p><strong>Data:</strong> ${new Date(
               cartao.Data_comentario
             ).toLocaleDateString()}</p>
             <p><strong>Exclusão:</strong> ${new Date(
               cartao.Data_conclusao
             ).toLocaleDateString()}</p>
-            <p><strong>Admin:</strong> ${cartao.nomeAdmin}</p>
+            <p><strong>Admin:</strong> ${nomeSimplificado}</p>
           `;
   
           dupla.appendChild(card);
