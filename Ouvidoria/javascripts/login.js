@@ -37,7 +37,11 @@ window.iniciarLogin = async function () {
 
         if (resultado.status) { 
             window.permissao = resultado.permissoes;
-            iniciar();
+            if (permissao != "desativado"){
+                iniciar();
+            } else {
+                alert('Este usuário encontra-se desativado. Por favor, fale com um administrador!');
+            };
         } else {
             alert('O usuário ou senha está errado(a). Por favor, tente novamente!');
         };
