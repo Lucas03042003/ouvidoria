@@ -294,7 +294,7 @@ window.renderizarUsuarios = async function(todosOsUsuarios) {
     
     for (let i = 0; i < todosOsUsuarios.length; i++) {
         const usuario = todosOsUsuarios[i];
-        const userItem = await criarElementoUsuario(usuario, roles, todosOsUsuarios);
+        const userItem = await criarElementoUsuario(usuario, roles, false);
         listUsers.appendChild(userItem);
 
         // Checa se é o último usuário e então adiciona os botões
@@ -307,26 +307,26 @@ window.renderizarUsuarios = async function(todosOsUsuarios) {
             `;
             listUsers.appendChild(addButtons);
 
-            addButtons.querySelector('.add-task').addEventListener('click', adicionarNovoUsuario);
+            addButtons.querySelector('.add-task').addEventListener('click', function () {adicionarNovoUsuario(todosOsUsuarios)});
             addButtons.querySelector('.save-button').addEventListener('click', enviarParaServidorUsers);
         }
     }
 };
   
-async function criarElementoUsuario(usuario, roles, todosOsUsuarios) {
+async function criarElementoUsuario(usuario, roles, editarUtm) {
     const userItem = document.createElement('div');
     userItem.className = 'user-item';
   
     // Verifica se o usuário é administrador de algum cartão
     const todosOsCartoes = await fetchCartoes(false, "normal");
-    const isAdminDeAlgumCartao = todosOsCartoes.some(cartao => cartao.Administrador == usuario.id_user);
-  
+    const isAdminDeAlgumCartao = todosOsCartoes.some(cartao => cartao.Administrador == usuario.id_user); 
+
     userItem.innerHTML = `
         <div class="user-info" id="${usuario.id_user}">
             <div class="user-avatar">${usuario.email[0].toUpperCase()}</div>
             <div class="user-details">
-                <span class="user-email" contenteditable="true">${usuario.email}</span>
-                <span class="key-user" contenteditable="true">${usuario.senha}</span>
+                <span class="user-email" contenteditable=${editarUtm}>${usuario.email}</span>
+                <span class="key-user" contenteditable=${editarUtm}>${usuario.senha}</span>
             </div>
         </div>
         <select class="user-role">
@@ -363,21 +363,21 @@ function atualizarUsuario(id_u, userItem) {
     };
 };
   
-function adicionarNovoUsuario(todosOsUsuarios) {
+async function adicionarNovoUsuario(todosOsUsuarios) {
+
     const novoId = window.todosOsUsuarios.length > 0 ? Math.max(...todosOsUsuarios.map(u => u.id_user)) + 1 : 1;
+
     const novoUsuario = {
         id_user: novoId,
         email: 'novo@email.com',
         permissoes: 'atendente',
         senha: 'nova_senha'
     };
-  
+
     window.todosOsUsuarios.push(novoUsuario);
-    
     const listUsers = document.getElementById('list-users');
     const roles = ['administrador', 'atendente', 'desativado'];
-    const novoElemento = criarElementoUsuario(novoUsuario, roles);
-    
+    const novoElemento = await criarElementoUsuario(novoUsuario, roles, true);
     // Inserir o novo usuário antes dos botões de ação
     listUsers.insertBefore(novoElemento, listUsers.lastChild);
 };

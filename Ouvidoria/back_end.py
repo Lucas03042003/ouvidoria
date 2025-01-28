@@ -285,8 +285,8 @@ def salvar_tags():
     
 @app.route('/salvar-usuarios', methods=['POST'])
 def salvar_usuarios():
-    cnx = None
-    cursor = None
+    # cnx = None
+    # cursor = None
     try:
         usuarios = request.json
         if not usuarios:
@@ -323,6 +323,9 @@ def salvar_usuarios():
                         values.append(usuario.get("id_user"))
                         query = "UPDATE Usuarios SET " + ", ".join(fields_to_update) + " WHERE id_user = %s"
                         cursor.execute(query, tuple(values))
+                else:
+                    query = "INSERT INTO Usuarios (email, senha, permissoes) VALUES (%s, %s, %s)"
+                    cursor.execute(query, (usuario.get("email"), usuario.get("senha"), usuario.get("permissoes"),))
 
         # Se chegou até aqui sem erros, commit da transação
         cnx.commit()
