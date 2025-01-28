@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Ouvidoria</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-top: 50px;
+        }
+        h2 {
+            color: #007bff;
+        }
+        h4 {
+            color: #6c757d;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-center" style="margin-bottom: 30px">
+            <h2>Ouvidoria</h2>
+            <p class="lead">Caso necessário entre em contato conosco.<br>Estamos à disposição para mais esclarecimentos sobre a utilização do serviço.</p>
+        </div>
+
+        <form onsubmit="return criarCartao()">
+            <h4>Dados Pessoais</h4>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="nome">Nome (*)</label>
+                    <input type="text" class="form-control" id="nome" name="nome" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="email">Email</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">@</span>
+                        </div>
+                        <input type="email" id="email" class="form-control" name="email">
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="cpf">CPF/CNPJ</label>
+                    <input type="text" id="cpf" class="form-control" name="cpf">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="ddd_celular">DDD</label>
+                            <input type="text" id="ddd_celular" class="form-control" name="ddd_celular">
+                        </div>
+                        <div class="col-md-8">
+                            <label for="celular">Celular</label>
+                            <input type="text" id="celular" class="form-control" name="celular">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h4>Mensagem</h4>
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label for="mensagem">Descrição (*)</label>
+                    <textarea rows="5" id="mensagem" class="form-control" name="mensagem" required></textarea>
+                </div>
+            </div>
+
+            <hr>
+
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Enviar</button>
+        </form>
+    </div>
+
+    <script>
+        function criarCartao() {
+            let mensagem = document.getElementById("mensagem").value;
+            let nome = document.getElementById("nome").value;
+        
+            fetch('http://127.0.0.1:5000/criar-cartao', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nome: nome,
+                    mensagem: mensagem
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Resposta do servidor:', data);
+                alert("Seu comentário foi enviado com sucesso!");
+            })
+            .catch(error => {
+                console.error('Erro ao enviar comentário:', error);
+                alert("Erro ao enviar seu comentário. Por favor, fale com nossas atendentes!");
+            });
+        
+            return false; // Previne o envio padrão do formulário
+        };
+    </script>
+</body>
+</html>

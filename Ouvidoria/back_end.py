@@ -661,6 +661,36 @@ def verificar_login():
             return jsonify({"status":True, "permissoes":resultado[0]["permissoes"]})
         else:
             return jsonify({"status":False})
+        
+@app.route('/criar-cartao', methods=['POST'])
+def criar_cartao():
+    try:
+        data = request.json
+        nome = data.get('nome')
+        msg = data.get('mensagem')
+        data_obs = datetime.now().date()
+
+        # Conexão com o banco de dados
+        cnx = get_db_connection()
+        cursor = cnx.cursor(dictionary=True)
+
+        # Inserir no banco de dados
+        query = "INSERT INTO Cartoes (Cliente, Data_comentario, Comentario, Etapa, Tag, Administrador, status) VALUES (%s, %s, %s, %s, %s, %s, 'normal')"
+        cursor.execute(query, (nome, data_obs, msg, 1, 1, 1))
+        
+        # Confirmar a transação
+        cnx.commit()
+
+        # Fechar o cursor e a conexão
+        cursor.close()
+        cnx.close()
+
+        # Retornar uma resposta de sucesso
+        return jsonify({"success": True, "message": "Histórico atualizado com sucesso"}), 200
+
+    except Exception as e:
+        # Tratar erros
+        return jsonify({"success": False, "error": str(e)}), 500
     
 if __name__ == '__main__':
     app.run(debug=True)
