@@ -664,7 +664,7 @@ def verificar_login():
         
 @app.route('/criar-cartao', methods=['POST'])
 def criar_cartao():
-    try:
+        
         data = request.json
         nome = data.get('nome')
         msg = data.get('mensagem')
@@ -674,11 +674,35 @@ def criar_cartao():
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
 
+        # Escolher primeira etapa do fluxo
+        GetFluxo = "select * from Fluxo"
+        cursor.execute(GetFluxo)
+        FluxoUm = cursor.fetchall()[0]
+
+        # Se não houver a tag "sem tag" na lista, ela será criada
+        GetTags = "select * from Tags"
+        cursor.execute(GetTags)
+        tags = cursor.fetchall()
+
+        SemTagID = ''
+        sem_tag = True
+        for tag in tags:
+            if "sem" in tag['titulo'].lower() and "tag" in tag['titulo'].lower():
+                sem_tag = False
+                SemTagID = tag["id_tag"]
+        
+        if sem_tag:
+            MakeTag = "INSERT INTO Tags (titulo, cor_tag, cor_texto) VALUES ('Sem Tag', '#333', 'F4F4F4')"
+            cursor.execute(MakeTag)
+            cnx.commit()
+
+            GetSemTag = "select * from Tags where titulo = 'Sem Tag'"
+            cursor.execute(GetSemTag)
+            SemTagID = cursor.fetchall()[0]["id_tag"]
+
         # Inserir no banco de dados
         query = "INSERT INTO Cartoes (Cliente, Data_comentario, Comentario, Etapa, Tag, Administrador, status) VALUES (%s, %s, %s, %s, %s, %s, 'normal')"
-        cursor.execute(query, (nome, data_obs, msg, 1, 1, 1))
-        
-        # Confirmar a transação
+        cursor.execute(query, (nome, data_obs, msg, FluxoUm["id_fluxo"], SemTagID, 1))
         cnx.commit()
 
         # Fechar o cursor e a conexão
@@ -686,11 +710,7 @@ def criar_cartao():
         cnx.close()
 
         # Retornar uma resposta de sucesso
-        return jsonify({"success": True, "message": "Histórico atualizado com sucesso"}), 200
-
-    except Exception as e:
-        # Tratar erros
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": True}), 200
     
 if __name__ == '__main__':
     app.run(debug=True)
