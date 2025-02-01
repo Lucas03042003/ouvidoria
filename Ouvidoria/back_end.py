@@ -397,6 +397,7 @@ def atualizar_etapa_cartao():
         card_id = data.get('cardId')
         new_fluxo_id = data.get('newFluxoId')
         new_fluxo_name = data.get('nomeFluxo')
+        email = data.get('login')
 
         if not card_id or not new_fluxo_id:
             return jsonify({"error": "Dados incompletos"}), 400
@@ -417,7 +418,7 @@ def atualizar_etapa_cartao():
             return jsonify({"error": "Cartão não encontrado ou nenhuma alteração feita"}), 404
         
         horario = datetime.now().date()
-        descricao = f'O cartão foi movido para a etapa "{new_fluxo_name}" no dia {horario}.'
+        descricao = f'O cartão foi movido para a etapa "{new_fluxo_name}" por {email} no dia {horario}.'
 
         update_historico_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
         cursor.execute(update_historico_query, (card_id,descricao,horario))
@@ -488,6 +489,7 @@ def atualizar_tag_cartao():
         data = request.json
         card_id = data.get('cardId')
         new_tag = data.get('newTag')
+        email = data.get('login')
 
         if not card_id or not new_tag:
             return jsonify({"error": "Dados incompletos"}), 400
@@ -508,7 +510,7 @@ def atualizar_tag_cartao():
             return jsonify({"error": "Cartão não encontrado ou nenhuma alteração feita"}), 404
 
         dia = datetime.now().date()
-        description = f"A tag do cartão foi modificada para {new_tag} no dia {dia}."
+        description = f"A tag do cartão foi modificada para {new_tag} por {email} no dia {dia}."
 
         # Atualizar a etapa do cartão
         update_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s);"
@@ -549,6 +551,7 @@ def atualizar_responsavel():
         data = request.json
         card_id = data.get('cardId')
         new_responsavel = data.get('newResponsavel')
+        email = data.get('login')
 
         if not card_id or not new_responsavel:
             return jsonify({"error": "Dados incompletos"}), 400
@@ -569,7 +572,7 @@ def atualizar_responsavel():
             return jsonify({"error": "Cartão não encontrado ou nenhuma alteração feita"}), 404
 
         dia = datetime.now().date()
-        description = f"O responsável do cartão foi modificada para {new_responsavel} no dia {dia}."
+        description = f"O responsável do cartão foi modificada por {email} para {new_responsavel} no dia {dia}."
 
         # Atualizar a etapa do cartão
         update_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s);"
@@ -613,6 +616,7 @@ def atualizar_status():
         cor_texto = data.get('cor_texto')
         Nome_admin = data.get('Nome_admin')
         dia = datetime.now().date()
+        email = data.get('login')
 
         # Conexão com o banco de dados
         cnx = get_db_connection()
@@ -622,7 +626,7 @@ def atualizar_status():
         query = "UPDATE Cartoes SET status = %s, titulo_tag = %s, cor_tag = %s, cor_texto = %s, Data_conclusao = %s, Nome_admin = %s, Tag = null, Administrador = null where ID_Cartao = %s;"
         cursor.execute(query, (status,titulo,cor_tag,cor_texto, dia, Nome_admin, card_id))
         
-        descricao = f"Esse cartão foi {status} no dia {datetime.now().date()}."
+        descricao = f"Esse cartão foi {status} por {email} no dia {datetime.now().date()}."
         query_historico = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
         cursor.execute(query_historico, (card_id, descricao, dia))
         

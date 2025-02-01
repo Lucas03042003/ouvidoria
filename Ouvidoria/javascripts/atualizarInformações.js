@@ -18,7 +18,8 @@ window.atualizarEtapaCartao = async function(cardId, newFluxoId) {
         body: JSON.stringify({
             cardId: cardId,
             newFluxoId: newFluxoId,
-            nomeFluxo: nomeFluxo
+            nomeFluxo: nomeFluxo,
+            login: window.email
         })
     })
     .then(response => {
@@ -45,7 +46,8 @@ window.atualizarHistorico = async function(msg, id_cartao) {
       },
       body: JSON.stringify({
           cardId: id_cartao,
-          mensagem: msg
+          mensagem: msg,
+          login: window.email
       })
     })    
     .then(response => {
@@ -72,7 +74,8 @@ window.atualizarNovoResponsavel = function(id_cartao) {
       },
       body: JSON.stringify({
           cardId: id_cartao,
-          newResponsavel: newResponsavel
+          newResponsavel: newResponsavel,
+          login: window.email
       })
     })
     .then(response => {
@@ -116,7 +119,8 @@ window.atualizarNovaTag = async function(id_cartao) {
       },
       body: JSON.stringify({
           cardId: id_cartao,
-          newTag: newTag
+          newTag: newTag,
+          login: window.email
       })
     })
     .then(response => {
@@ -263,7 +267,8 @@ window.mudarStatus = async function(id_cartao, status, titulo, cor_tag, cor_text
         titulo: titulo,
         cor_tag: cor_tag,
         cor_texto: cor_texto,
-        Nome_admin: nomeAdmin
+        Nome_admin: nomeAdmin,
+        login: window.email
       })
     });
   
