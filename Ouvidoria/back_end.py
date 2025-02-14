@@ -14,7 +14,7 @@ def get_db_connection():
         port="3306",
         user="root",
         password="lcn2505@K",
-        database="ouvidoria"
+        database="primare_ouvidoria"
     )
 
 @app.route('/ativar-usuarios', methods=['POST'])
