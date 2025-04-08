@@ -1,0 +1,18 @@
+name: meu-aplicativo
+services:
+- name: api
+  github:
+    repo: backend
+    branch: main
+  build_command: pip install -r requirements.txt
+  run_command: python backend\back_end.py  # ou gunicorn ou outro comando para iniciar o Flask
+  envs:
+  - key: DATABASE_URL
+    value: ${db.DATABASE_URL}
+
+- name: frontend
+  github:
+    repo: seu-usuario/seu-repositorio
+    branch: main
+  build_command: echo "No build required"  # Ou simplesmente deixe em branco
+  output_dir: frontend/public  # Diretório onde estão seus arquivos estáticos
