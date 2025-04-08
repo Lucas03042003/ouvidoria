@@ -63,7 +63,7 @@ window.iniciar = async function () {
         </aside>
         <div class="content" id="content">
             <div class="cabecalho">
-                <img class="img-login" src="galeria/img_login.png" alt="Imagem de Login" id="btn-login"/>
+                <img class="img-login" src="src/components/assets/img_login.png" alt="Imagem de Login" id="btn-login"/>
             </div>
             <div class="kanban-div" id="content-kanban">
                 <div class="kanban" id="kanban">
@@ -76,7 +76,7 @@ window.iniciar = async function () {
     if (permissao == "admin") {
         const img = document.createElement("img");
         img.className = "img-config";
-        img.src = "galeria/config.png";
+        img.src = "src/components/assets/config.png";
         img.id = "config";
         img.alt = "Imagem de config";
         img.title = "Configurações";

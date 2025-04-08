@@ -41,7 +41,7 @@ function ativarMenu(btn_home_class, btn_final_class, btn_excl_class) {
       <a href="#" class="opcao" id="btn-home">Home</a>
       <a href="#" class="selecionado" id="btn-finalizados">Finalizados</a>
       <a href="#" class="opcao" id="btn-excluidos">Excluídos</a>
-      <img class="img-config" src="galeria/config.png" alt="Imagem de config" id="config"/>
+      <img class="img-config" src="src/components/assets/config.png" alt="Imagem de config" id="config"/>
       `;
     };    
     if (btn_excl_class == 'selecionado') {
@@ -50,7 +50,7 @@ function ativarMenu(btn_home_class, btn_final_class, btn_excl_class) {
       <a href="#" class="opcao" id="btn-home">Home</a>
       <a href="#" class="opcao" id="btn-finalizados">Finalizados</a>
       <a href="#" class="selecionado" id="btn-excluidos">Excluídos</a>
-      <img class="img-config" src="galeria/config.png" alt="Imagem de config" id="config"/>
+      <img class="img-config" src="src/components/assets/config.png" alt="Imagem de config" id="config"/>
       `;
     };
 
@@ -61,7 +61,7 @@ function ativarMenu(btn_home_class, btn_final_class, btn_excl_class) {
     if (permissao == "admin") {
       const img = document.createElement("img");
       img.className = "img-config";
-      img.src = "galeria/config.png";
+      img.src = "src/components/assets/config.png";
       img.id = "config";
       img.alt = "Imagem de config";
       img.title = "Configurações";
