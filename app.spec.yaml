@@ -1,18 +1,63 @@
-name: meu-aplicativo
+version: "1.0"
+name: ouvidoria-app
 services:
-- name: api
-  github:
-    repo: Lucas0304203/ouvidoria
-    branch: main
-  build_command: pip install -r requirements.txt
-  run_command: python backend\back_end.py  # ou gunicorn ou outro comando para iniciar o Flask
-  envs:
-  - key: DATABASE_URL
-    value: ${db.DATABASE_URL}
+  - name: api
+    github:
+      repo: Lucas0304200/ouvidoria
+      branch: main
+    build_command: pip install -r requirements.txt
+    run_command: python backend/back_end.py
+    envs:
+      - key: DB_HOST
+        value: ${db.HOSTNAME}
+      - key: DB_PORT
+        value: ${db.PORT}
+      - key: DB_USER
+        value: ${db.USERNAME}
+      - key: DB_PASSWORD
+        value: ${db.PASSWORD}
+      - key: DB_NAME
+        value: ${db.DATABASE}
+      - key: PORT
+        value: ${_self.PRIVATE_PORT}
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 10
+      period_seconds: 30
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
 
-- name: frontend
-  github:
-    repo: Lucas0304203/ouvidoria
-    branch: main
-  build_command: echo "No build required"  # Ou simplesmente deixe em branco
-  output_dir: frontend/public  # Diretório onde estão seus arquivos estáticos
+  - name: frontend
+    github:
+      repo: seu-usuario/ouvidoria
+
+      branch: main
+    build_command: echo "No build required"
+    output_dir: frontend/public
+    routes:
+      - path: /
+    cors:
+      allow_origins:
+        - regex: .*
+      allow_methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allow_headers:
+        - Content-Type
+        - Authorization
+      expose_headers:
+        - Content-Length
+      max_age: 86400
+
+databases:
+  - name: db
+    engine: MYSQL
+    version: "8"
+    production:
+      cluster_size: basic
+    db_name: primare_ouvidoria
+    db_user: app_user
