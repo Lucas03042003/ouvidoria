@@ -7,7 +7,6 @@ from flask_cors import CORS
 from datetime import datetime
 import re
 
-# Configuração de logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -18,16 +17,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app)  # Habilita CORS para todas as rotas
 
-# Obter variáveis de ambiente ou usar valores padrão para desenvolvimento
+# Configuração do sistema
 DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
 DB_PORT = os.environ.get('DB_PORT', '3306')
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'lcn2505@K')
 DB_NAME = os.environ.get('DB_NAME', 'primare_ouvidoria')
 
-# Configuração do pool de conexões
 try:
     connection_pool = mysql.connector.pooling.MySQLConnectionPool(
         pool_name="ouvidoria_pool",
@@ -43,7 +40,6 @@ except Exception as e:
     logger.error(f"Erro ao inicializar pool de conexões: {e}")
     raise
 
-# Função auxiliar para obter conexão do pool
 def get_db_connection():
     try:
         return connection_pool.get_connection()
@@ -51,19 +47,8 @@ def get_db_connection():
         logger.error(f"Erro ao obter conexão do pool: {e}")
         raise
 
-# Função para validar entrada
 def validate_input(data, required_fields=None, field_types=None):
-    """
-    Valida os dados de entrada
-    
-    Args:
-        data: Dicionário com os dados a serem validados
-        required_fields: Lista de campos obrigatórios
-        field_types: Dicionário com os tipos esperados para cada campo
-    
-    Returns:
-        (bool, str): Tupla com resultado da validação e mensagem de erro
-    """
+
     if required_fields:
         for field in required_fields:
             if field not in data or data[field] is None:
@@ -77,20 +62,15 @@ def validate_input(data, required_fields=None, field_types=None):
     
     return True, ""
 
-# Função para sanitizar entrada
 def sanitize_input(value):
-    """
-    Sanitiza valores de entrada para prevenir SQL injection e XSS
-    """
     if isinstance(value, str):
-        # Remove caracteres potencialmente perigosos
         return re.sub(r'[\'";\\]', '', value)
     return value
 
+# VERIFICAR SE O USUÁRIO ESTÁ AUTORIZADO A ACESSAR O SISTEMA
 @app.route('/verificar-login', methods=['POST'])
 def verificar_login():
 
-        # Obtém os dados do corpo da requisição
         data = request.json
         email = data.get('email')
         senha = data.get('senha')
@@ -109,6 +89,7 @@ def verificar_login():
         else:
             return jsonify({"status":False})
 
+# Permitir criação de um novo usuário
 @app.route('/ativar-usuarios', methods=['POST'])
 def ativar_usuarios():
     try:
@@ -129,6 +110,7 @@ def ativar_usuarios():
         if cnx:
             cnx.close()
 
+# Criar novas tags
 @app.route('/ativar-tag', methods=['POST'])
 def ativar_tags():
     try:
@@ -149,6 +131,7 @@ def ativar_tags():
         if cnx:
             cnx.close()
 
+# Criar novos fluxos
 @app.route('/ativar-fluxo', methods=['POST'])
 def ativar_fluxo():
     try:
@@ -169,6 +152,7 @@ def ativar_fluxo():
         if cnx:
             cnx.close()
 
+# Ativar configuração do sistema
 @app.route('/ativar-sistema', methods=['POST'])
 def ativar_sistema():
     try:
@@ -189,10 +173,10 @@ def ativar_sistema():
         if cnx:
             cnx.close()
 
+# Ativar histórico de cartões  
 @app.route('/ativar-historico', methods=['POST']) 
 def ativar_historico(): 
     try:
-        # Validar entrada
         data = request.json
         valid, error_msg = validate_input(data, required_fields=['cardId'])
         if not valid:
@@ -218,10 +202,10 @@ def ativar_historico():
         if cnx:
             cnx.close()
 
+# Ativar histórico de cartões excluídos ou finalizados
 @app.route('/ativar-historico-exfin', methods=['POST']) 
 def ativar_historico_exfin(): 
     try:
-        # Validar entrada
         data = request.json
         valid, error_msg = validate_input(data, required_fields=['cardId'])
         if not valid:
@@ -247,10 +231,10 @@ def ativar_historico_exfin():
         if cnx:
             cnx.close()
 
+# Coletar cartões com base no status e permissões do usuário
 @app.route('/coletar-cartoes', methods=['POST'])
 def coletar_cartoes():
     try:
-        # Validar entrada
         data = request.json
         valid, error_msg = validate_input(data, required_fields=['status'])
         if not valid:
@@ -262,7 +246,6 @@ def coletar_cartoes():
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
         
-        # Verificar permissões do usuário se email for fornecido
         user_query = "SELECT permissoes FROM usuarios WHERE email = %s"
         user_permission = None
         
@@ -272,7 +255,6 @@ def coletar_cartoes():
             if user_result:
                 user_permission = user_result["permissoes"]
         
-        # Consulta otimizada com JOIN e índices
         if user_permission == "user" and status == "normal":
             query = """
             SELECT c.ID_Cartao, c.Cliente, c.Data_comentario, c.Data_conclusao, 
@@ -306,7 +288,6 @@ def coletar_cartoes():
 
         cartoes = cursor.fetchall()
 
-        # Converter as datas para string
         for cartao in cartoes:
             if cartao['Data_comentario']:
                 cartao['Data_comentario'] = cartao['Data_comentario'].strftime('%Y-%m-%d')
@@ -323,12 +304,12 @@ def coletar_cartoes():
         if cnx:
             cnx.close()
 
+# Salvar fluxos
 @app.route('/salvar-fluxos', methods=['POST'])
 def salvar_fluxos():
     cnx = None
     cursor = None
     try:
-        # Validar entrada
         novos_fluxos = request.json
         if not isinstance(novos_fluxos, list):
             return jsonify({"error": "Formato inválido. Esperado uma lista de fluxos."}), 400
@@ -336,45 +317,35 @@ def salvar_fluxos():
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
 
-        # Iniciar uma transação
         cnx.start_transaction()
 
-        # Buscar fluxos existentes
         cursor.execute("SELECT id_fluxo, nome FROM Fluxo")
         fluxos_existentes = {fluxo['id_fluxo']: fluxo['nome'] for fluxo in cursor.fetchall()}
 
-        # Atualizar fluxos existentes e inserir novos
         update_query = "UPDATE Fluxo SET nome = %s, posicao = %s WHERE id_fluxo = %s"
         insert_query = "INSERT INTO Fluxo (id_fluxo, nome, posicao) VALUES (%s, %s, %s)"
         
         for fluxo in novos_fluxos:
-            # Validar campos obrigatórios
             if 'id_fluxo' not in fluxo or 'nome' not in fluxo or 'posicao' not in fluxo:
                 cnx.rollback()
                 return jsonify({"error": "Campos obrigatórios ausentes em um ou mais fluxos"}), 400
                 
-            # Sanitizar entrada
             nome = sanitize_input(fluxo['nome'])
             
             if fluxo['id_fluxo'] in fluxos_existentes:
-                # Atualizar fluxo existente
                 cursor.execute(update_query, (nome, fluxo['posicao'], fluxo['id_fluxo']))
             else:
-                # Inserir novo fluxo
                 cursor.execute(insert_query, (fluxo['id_fluxo'], nome, fluxo['posicao']))
 
-        # Remover fluxos que não estão mais presentes
         fluxos_atuais = set(fluxo['id_fluxo'] for fluxo in novos_fluxos)
         fluxos_para_remover = set(fluxos_existentes.keys()) - fluxos_atuais
         
         if fluxos_para_remover:
-            # Verificar se algum fluxo a ser removido está em uso
             placeholders = ', '.join(['%s'] * len(fluxos_para_remover))
             check_query = f"SELECT Etapa FROM Cartoes WHERE Etapa IN ({placeholders})"
             cursor.execute(check_query, tuple(fluxos_para_remover))
             fluxos_em_uso = set(row['Etapa'] for row in cursor.fetchall())
             
-            # Remover apenas os fluxos que não estão em uso
             fluxos_para_remover = fluxos_para_remover - fluxos_em_uso
             
             if fluxos_para_remover:
@@ -382,31 +353,28 @@ def salvar_fluxos():
                 delete_query = f"DELETE FROM Fluxo WHERE id_fluxo IN ({placeholders})"
                 cursor.execute(delete_query, tuple(fluxos_para_remover))
 
-        # Se chegou até aqui sem erros, commit da transação
         cnx.commit()
         
         return jsonify({"message": "Fluxos atualizados com sucesso!"}), 200
 
     except Exception as e:
-        # Se ocorrer qualquer erro, fazer rollback
         if cnx:
             cnx.rollback()
         logger.error(f"Erro ao salvar fluxos: {e}")
         return jsonify({"error": "Erro ao processar requisição"}), 500
 
     finally:
-        # Fechar cursor e conexão, independentemente do resultado
         if cursor:
             cursor.close()
         if cnx:
             cnx.close()
 
+# Salvar tags
 @app.route('/salvar-tags', methods=['POST'])
 def salvar_tags():
     cnx = None
     cursor = None
     try:
-        # Validar entrada
         novas_tags = request.json
         if not isinstance(novas_tags, list):
             return jsonify({"error": "Formato inválido. Esperado uma lista de tags."}), 400
@@ -414,24 +382,19 @@ def salvar_tags():
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
 
-        # Iniciar uma transação
         cnx.start_transaction()
 
-        # Buscar tags existentes
         cursor.execute("SELECT id_tag, titulo FROM Tags")
         tags_existentes = {tag['id_tag']: tag['titulo'] for tag in cursor.fetchall()}
 
-        # Atualizar tags existentes e inserir novas
         update_query = "UPDATE Tags SET titulo = %s, cor_tag = %s, cor_texto = %s WHERE id_tag = %s"
         insert_query = "INSERT INTO Tags (id_tag, titulo, cor_tag, cor_texto) VALUES (%s, %s, %s, %s)"
         
         for tag in novas_tags:
-            # Validar campos obrigatórios
             if 'id_tag' not in tag or 'titulo' not in tag or 'cor_tag' not in tag or 'cor_texto' not in tag:
                 cnx.rollback()
                 return jsonify({"error": "Campos obrigatórios ausentes em uma ou mais tags"}), 400
                 
-            # Sanitizar entrada
             titulo = sanitize_input(tag['titulo'])
             cor_tag = sanitize_input(tag['cor_tag'])
             cor_texto = sanitize_input(tag['cor_texto'])
@@ -441,18 +404,15 @@ def salvar_tags():
             else:
                 cursor.execute(insert_query, (tag['id_tag'], titulo, cor_tag, cor_texto))
 
-        # Remover tags que não estão mais presentes
         tags_atuais = set(tag['id_tag'] for tag in novas_tags)
         tags_para_remover = set(tags_existentes.keys()) - tags_atuais
         
         if tags_para_remover:
-            # Verificar se alguma tag a ser removida está em uso
             placeholders = ', '.join(['%s'] * len(tags_para_remover))
             check_query = f"SELECT Tag FROM Cartoes WHERE Tag IN ({placeholders})"
             cursor.execute(check_query, tuple(tags_para_remover))
             tags_em_uso = set(row['Tag'] for row in cursor.fetchall())
             
-            # Remover apenas as tags que não estão em uso
             tags_para_remover = tags_para_remover - tags_em_uso
             
             if tags_para_remover:
@@ -460,7 +420,6 @@ def salvar_tags():
                 delete_query = f"DELETE FROM Tags WHERE id_tag IN ({placeholders})"
                 cursor.execute(delete_query, tuple(tags_para_remover))
 
-        # Commit da transação
         cnx.commit()
         
         return jsonify({"message": "Tags atualizadas com sucesso!"}), 200
@@ -477,12 +436,12 @@ def salvar_tags():
         if cnx:
             cnx.close()
     
+# Salvar usuários
 @app.route('/salvar-usuarios', methods=['POST'])
 def salvar_usuarios():
     cnx = None
     cursor = None
     try:
-        # Validar entrada
         usuarios = request.json
         if not isinstance(usuarios, list):
             return jsonify({"error": "Formato inválido. Esperado uma lista de usuários."}), 400
@@ -493,16 +452,13 @@ def salvar_usuarios():
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
 
-        # Iniciar uma transação
         cnx.start_transaction()
 
         for usuario in usuarios:
-            # Validar campos obrigatórios
             if 'id_user' not in usuario:
                 cnx.rollback()
                 return jsonify({"error": "Campo id_user obrigatório ausente em um ou mais usuários"}), 400
                 
-            # Sanitizar entrada
             if 'email' in usuario:
                 usuario['email'] = sanitize_input(usuario['email'])
             if 'senha' in usuario:
@@ -511,7 +467,6 @@ def salvar_usuarios():
                 usuario['permissoes'] = sanitize_input(usuario['permissoes'])
                 
             if usuario.get('permissoes') == "excluir":
-                # Verificar se o usuário está associado a algum cartão
                 check_query = "SELECT ID_Cartao FROM Cartoes WHERE Administrador = %s LIMIT 1"
                 cursor.execute(check_query, (usuario.get("id_user"),))
                 if cursor.fetchone():
@@ -519,17 +474,14 @@ def salvar_usuarios():
                     
                 cursor.execute("DELETE FROM Usuarios WHERE id_user = %s", (usuario.get("id_user"),))
             else:
-                # Verificar se o usuário já existe
                 cursor.execute("SELECT * FROM Usuarios WHERE id_user = %s", (usuario.get("id_user"),))
                 old_user = cursor.fetchone()
                 
                 if old_user:
-                    # Atualizar usuário existente
                     fields_to_update = []
                     values = []
                     
                     if 'email' in usuario and old_user['email'] != usuario['email']:
-                        # Verificar se o novo email já existe
                         cursor.execute("SELECT id_user FROM Usuarios WHERE email = %s AND id_user != %s", 
                                       (usuario['email'], usuario.get("id_user")))
                         if cursor.fetchone():
@@ -552,46 +504,40 @@ def salvar_usuarios():
                         query = "UPDATE Usuarios SET " + ", ".join(fields_to_update) + " WHERE id_user = %s"
                         cursor.execute(query, tuple(values))
                 else:
-                    # Verificar campos obrigatórios para novo usuário
                     if 'email' not in usuario or 'senha' not in usuario or 'permissoes' not in usuario:
                         cnx.rollback()
                         return jsonify({"error": "Campos obrigatórios ausentes para novo usuário"}), 400
                         
-                    # Verificar se o email já existe
                     cursor.execute("SELECT id_user FROM Usuarios WHERE email = %s", (usuario['email'],))
                     if cursor.fetchone():
                         cnx.rollback()
                         return jsonify({"error": f"O email {usuario['email']} já está em uso"}), 409
                         
-                    # Inserir novo usuário
                     query = "INSERT INTO Usuarios (email, senha, permissoes) VALUES (%s, %s, %s)"
                     cursor.execute(query, (usuario.get("email"), usuario.get("senha"), usuario.get("permissoes")))
 
-        # Se chegou até aqui sem erros, commit da transação
         cnx.commit()
 
         return jsonify({"message": "Usuários atualizados com sucesso!"}), 200
 
     except Exception as e:
-        # Se ocorrer qualquer erro, fazer rollback
         if cnx:
             cnx.rollback()
         logger.error(f"Erro ao salvar usuários: {e}")
         return jsonify({"error": "Erro ao processar requisição"}), 500
 
     finally:
-        # Fechar cursor e conexão, independentemente do resultado
         if cursor:
             cursor.close()
         if cnx:
             cnx.close()
 
+# Atualizar configurações do sistema
 @app.route('/atualizar-sistema', methods=['POST'])
 def atualizar_sistema():
     cnx = None
     cursor = None
     try:
-        # Validar entrada
         data = request.json
         valid, error_msg = validate_input(data, required_fields=['config1'])
         if not valid:
@@ -602,14 +548,11 @@ def atualizar_sistema():
         cnx = get_db_connection()
         cursor = cnx.cursor()
 
-        # Iniciar uma transação
         cnx.start_transaction()
 
-        # Atualizar o sistema com o valor recebido
         update_query = "UPDATE Config SET config1 = %s"
         cursor.execute(update_query, (novo_estado,))
 
-        # Se chegou até aqui sem erros, commit da transação
         cnx.commit()
         
         return jsonify({"message": "Configurações atualizadas com sucesso!", "novo_estado": novo_estado}), 200
@@ -626,12 +569,12 @@ def atualizar_sistema():
         if cnx:
             cnx.close()
 
+# Atualizar etapa do cartão
 @app.route('/api/atualizar-etapa-cartao', methods=['POST'])
 def atualizar_etapa_cartao():
     cnx = None
     cursor = None
     try:
-        # Validar entrada
         data = request.json
         valid, error_msg = validate_input(data, required_fields=['cardId', 'newFluxoId'])
         if not valid:
@@ -645,24 +588,20 @@ def atualizar_etapa_cartao():
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
 
-        # Iniciar uma transação
         cnx.start_transaction()
 
-        # Verificar se o cartão existe
         check_query = "SELECT ID_Cartao FROM Cartoes WHERE ID_Cartao = %s"
         cursor.execute(check_query, (card_id,))
         if not cursor.fetchone():
             cnx.rollback()
             return jsonify({"error": "Cartão não encontrado"}), 404
             
-        # Verificar se o fluxo existe
         check_query = "SELECT id_fluxo FROM Fluxo WHERE id_fluxo = %s"
         cursor.execute(check_query, (new_fluxo_id,))
         if not cursor.fetchone():
             cnx.rollback()
             return jsonify({"error": "Fluxo não encontrado"}), 404
 
-        # Atualizar a etapa do cartão
         update_query = "UPDATE Cartoes SET Etapa = %s WHERE ID_Cartao = %s"
         cursor.execute(update_query, (new_fluxo_id, card_id))
         
@@ -672,7 +611,6 @@ def atualizar_etapa_cartao():
         update_historico_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
         cursor.execute(update_historico_query, (card_id, descricao, horario))
 
-        # Commit da transação
         cnx.commit()
 
         return jsonify({
@@ -694,10 +632,10 @@ def atualizar_etapa_cartao():
         if cnx:
             cnx.close()
 
+# Atualizar histórico de mensagens do cartão
 @app.route('/atualizar-historico-msgs', methods=['POST'])
 def atualizar_msg_historico():
     try:
-        # Validar entrada
         data = request.json
         valid, error_msg = validate_input(data, required_fields=['cardId', 'mensagem'])
         if not valid:
@@ -707,17 +645,14 @@ def atualizar_msg_historico():
         msg = sanitize_input(data.get('mensagem'))
         data_obs = datetime.now().date()
 
-        # Conexão com o banco de dados
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
 
-        # Verificar se o cartão existe
         check_query = "SELECT ID_Cartao FROM Cartoes WHERE ID_Cartao = %s"
         cursor.execute(check_query, (card_id,))
         if not cursor.fetchone():
             return jsonify({"error": "Cartão não encontrado"}), 404
 
-        # Inserir no banco de dados
         query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
         cursor.execute(query, (card_id, msg, data_obs))
         cnx.commit()
@@ -732,10 +667,10 @@ def atualizar_msg_historico():
         if cnx:
             cnx.close()
 
+# Atualizar cartão
 @app.route('/atualizar-cartao', methods=['POST'])
 def atualizar_cartao():
     try:
-        # Validar entrada
         data = request.json
         valid, error_msg = validate_input(data, required_fields=['cardId'])
         if not valid:
@@ -743,7 +678,6 @@ def atualizar_cartao():
             
         card_id = data.get('cardId')
         
-        # Sanitizar entradas
         cliente = sanitize_input(data.get('cliente', ''))
         comentario = sanitize_input(data.get('comentario', ''))
         tag_id = data.get('tag')
@@ -751,20 +685,16 @@ def atualizar_cartao():
         cor_tag = sanitize_input(data.get('cor_tag', ''))
         cor_texto = sanitize_input(data.get('cor_texto', ''))
         
-        # Conexão com o banco de dados
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
         
-        # Verificar se o cartão existe
         check_query = "SELECT ID_Cartao FROM Cartoes WHERE ID_Cartao = %s"
         cursor.execute(check_query, (card_id,))
         if not cursor.fetchone():
             return jsonify({"error": "Cartão não encontrado"}), 404
 
-        # Iniciar transação
         cnx.start_transaction()
         
-        # Construir a query de atualização dinamicamente
         update_fields = []
         update_values = []
         
@@ -795,21 +725,17 @@ def atualizar_cartao():
         if not update_fields:
             return jsonify({"message": "Nenhum campo para atualizar"}), 200
             
-        # Adicionar o ID do cartão aos valores
         update_values.append(card_id)
         
-        # Construir e executar a query
         update_query = f"UPDATE Cartoes SET {', '.join(update_fields)} WHERE ID_Cartao = %s"
         cursor.execute(update_query, tuple(update_values))
         
-        # Registrar no histórico
         data_obs = datetime.now().date()
         descricao = f"O cartão foi atualizado em {data_obs}."
         
         historico_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
         cursor.execute(historico_query, (card_id, descricao, data_obs))
         
-        # Commit da transação
         cnx.commit()
         
         return jsonify({"message": "Cartão atualizado com sucesso"}), 200
@@ -824,100 +750,54 @@ def atualizar_cartao():
         if cnx:
             cnx.close()
 
+#   Criar cartão no cadastrar.html
 @app.route('/criar-cartao', methods=['POST'])
 def criar_cartao():
-    try:
-        # Validar entrada
+        
         data = request.json
-        required_fields = ['cliente', 'comentario', 'etapa', 'administrador', 'nome_admin']
-        valid, error_msg = validate_input(data, required_fields=required_fields)
-        if not valid:
-            return jsonify({"error": error_msg}), 400
-            
-        # Sanitizar entradas
-        cliente = sanitize_input(data.get('cliente'))
-        comentario = sanitize_input(data.get('comentario'))
-        etapa = data.get('etapa')
-        tag = data.get('tag')
-        titulo_tag = sanitize_input(data.get('titulo_tag', ''))
-        cor_tag = sanitize_input(data.get('cor_tag', ''))
-        cor_texto = sanitize_input(data.get('cor_texto', ''))
-        administrador = data.get('administrador')
-        nome_admin = sanitize_input(data.get('nome_admin'))
-        status = "normal"  # Status padrão para novos cartões
-        
-        # Data atual para o comentário
-        data_comentario = datetime.now().date()
-        
-        # Conexão com o banco de dados
+        nome = data.get('nome')
+        msg = data.get('mensagem')
+        data_obs = datetime.now().date()
+
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
-        
-        # Verificar se o administrador existe
-        check_query = "SELECT id_user FROM Usuarios WHERE id_user = %s"
-        cursor.execute(check_query, (administrador,))
-        if not cursor.fetchone():
-            return jsonify({"error": "Administrador não encontrado"}), 404
-            
-        # Verificar se a etapa existe
-        check_query = "SELECT id_fluxo FROM Fluxo WHERE id_fluxo = %s"
-        cursor.execute(check_query, (etapa,))
-        if not cursor.fetchone():
-            return jsonify({"error": "Etapa não encontrada"}), 404
-            
-        # Verificar se a tag existe (se fornecida)
-        if tag:
-            check_query = "SELECT id_tag FROM Tags WHERE id_tag = %s"
-            cursor.execute(check_query, (tag,))
-            if not cursor.fetchone():
-                return jsonify({"error": "Tag não encontrada"}), 404
-        
-        # Iniciar transação
-        cnx.start_transaction()
-        
-        # Inserir o novo cartão
-        insert_query = """
-        INSERT INTO Cartoes (Cliente, Data_comentario, Comentario, Etapa, Tag, 
-                            titulo_tag, cor_tag, cor_texto, Administrador, Nome_admin, status)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        
-        cursor.execute(insert_query, (
-            cliente, data_comentario, comentario, etapa, tag,
-            titulo_tag, cor_tag, cor_texto, administrador, nome_admin, status
-        ))
-        
-        # Obter o ID do cartão inserido
-        card_id = cursor.lastrowid
-        
-        # Registrar no histórico
-        descricao = f"Cartão criado em {data_comentario}."
-        
-        historico_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
-        cursor.execute(historico_query, (card_id, descricao, data_comentario))
-        
-        # Commit da transação
-        cnx.commit()
-        
-        return jsonify({
-            "message": "Cartão criado com sucesso",
-            "cardId": card_id
-        }), 201
-    except Exception as e:
-        if cnx:
-            cnx.rollback()
-        logger.error(f"Erro ao criar cartão: {e}")
-        return jsonify({"error": "Erro ao processar requisição"}), 500
-    finally:
-        if cursor:
-            cursor.close()
-        if cnx:
-            cnx.close()
 
+        GetFluxo = "select * from Fluxo"
+        cursor.execute(GetFluxo)
+        FluxoUm = cursor.fetchall()[0]
+
+        GetTags = "select * from Tags"
+        cursor.execute(GetTags)
+        tags = cursor.fetchall()
+
+        SemTagID = ''
+        sem_tag = True
+        for tag in tags:
+            if "sem" in tag['titulo'].lower() and "tag" in tag['titulo'].lower():
+                sem_tag = False
+                SemTagID = tag["id_tag"]
+        
+        if sem_tag:
+            cursor.execute(MakeTag)
+            cnx.commit()
+
+            GetSemTag = "select * from Tags where titulo = 'Sem Tag'"
+            cursor.execute(GetSemTag)
+            SemTagID = cursor.fetchall()[0]["id_tag"]
+
+        query = "INSERT INTO Cartoes (Cliente, Data_comentario, Comentario, Etapa, Tag, Administrador, status) VALUES (%s, %s, %s, %s, %s, %s, 'normal')"
+        cursor.execute(query, (nome, data_obs, msg, FluxoUm["id_fluxo"], SemTagID, 1))
+        cnx.commit()
+
+        cursor.close()
+        cnx.close()
+
+        return jsonify({"success": True}), 200
+
+# Mudar o status do cartão para excluído
 @app.route('/excluir-cartao', methods=['POST'])
 def excluir_cartao():
     try:
-        # Validar entrada
         data = request.json
         valid, error_msg = validate_input(data, required_fields=['cardId'])
         if not valid:
@@ -925,11 +805,9 @@ def excluir_cartao():
             
         card_id = data.get('cardId')
         
-        # Conexão com o banco de dados
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
         
-        # Verificar se o cartão existe
         check_query = "SELECT ID_Cartao, status FROM Cartoes WHERE ID_Cartao = %s"
         cursor.execute(check_query, (card_id,))
         cartao = cursor.fetchone()
@@ -940,21 +818,17 @@ def excluir_cartao():
         if cartao['status'] != 'normal':
             return jsonify({"error": "Cartão já está excluído ou finalizado"}), 400
         
-        # Iniciar transação
         cnx.start_transaction()
         
-        # Atualizar o status do cartão para "excluido"
         update_query = "UPDATE Cartoes SET status = 'excluido' WHERE ID_Cartao = %s"
         cursor.execute(update_query, (card_id,))
         
-        # Registrar no histórico
         data_obs = datetime.now().date()
         descricao = f"Cartão excluído em {data_obs}."
         
         historico_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
         cursor.execute(historico_query, (card_id, descricao, data_obs))
         
-        # Commit da transação
         cnx.commit()
         
         return jsonify({"message": "Cartão excluído com sucesso"}), 200
@@ -969,10 +843,10 @@ def excluir_cartao():
         if cnx:
             cnx.close()
 
+# Mudar o status do cartão para finalizado
 @app.route('/finalizar-cartao', methods=['POST'])
 def finalizar_cartao():
     try:
-        # Validar entrada
         data = request.json
         valid, error_msg = validate_input(data, required_fields=['cardId'])
         if not valid:
@@ -980,11 +854,9 @@ def finalizar_cartao():
             
         card_id = data.get('cardId')
         
-        # Conexão com o banco de dados
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
         
-        # Verificar se o cartão existe
         check_query = "SELECT ID_Cartao, status FROM Cartoes WHERE ID_Cartao = %s"
         cursor.execute(check_query, (card_id,))
         cartao = cursor.fetchone()
@@ -995,23 +867,18 @@ def finalizar_cartao():
         if cartao['status'] != 'normal':
             return jsonify({"error": "Cartão já está excluído ou finalizado"}), 400
         
-        # Data atual para a conclusão
         data_conclusao = datetime.now().date()
         
-        # Iniciar transação
         cnx.start_transaction()
         
-        # Atualizar o status do cartão para "finalizado" e definir a data de conclusão
         update_query = "UPDATE Cartoes SET status = 'finalizado', Data_conclusao = %s WHERE ID_Cartao = %s"
         cursor.execute(update_query, (data_conclusao, card_id))
         
-        # Registrar no histórico
         descricao = f"Cartão finalizado em {data_conclusao}."
         
         historico_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
         cursor.execute(historico_query, (card_id, descricao, data_conclusao))
         
-        # Commit da transação
         cnx.commit()
         
         return jsonify({
@@ -1029,93 +896,7 @@ def finalizar_cartao():
         if cnx:
             cnx.close()
 
-@app.route('/restaurar-cartao', methods=['POST'])
-def restaurar_cartao():
-    try:
-        # Validar entrada
-        data = request.json
-        valid, error_msg = validate_input(data, required_fields=['cardId'])
-        if not valid:
-            return jsonify({"error": error_msg}), 400
-            
-        card_id = data.get('cardId')
-        
-        # Conexão com o banco de dados
-        cnx = get_db_connection()
-        cursor = cnx.cursor(dictionary=True)
-        
-        # Verificar se o cartão existe
-        check_query = "SELECT ID_Cartao, status FROM Cartoes WHERE ID_Cartao = %s"
-        cursor.execute(check_query, (card_id,))
-        cartao = cursor.fetchone()
-        
-        if not cartao:
-            return jsonify({"error": "Cartão não encontrado"}), 404
-            
-        if cartao['status'] == 'normal':
-            return jsonify({"error": "Cartão já está ativo"}), 400
-        
-        # Iniciar transação
-        cnx.start_transaction()
-        
-        # Atualizar o status do cartão para "normal" e limpar a data de conclusão se estiver finalizado
-        update_query = "UPDATE Cartoes SET status = 'normal', Data_conclusao = NULL WHERE ID_Cartao = %s"
-        cursor.execute(update_query, (card_id,))
-        
-        # Registrar no histórico
-        data_obs = datetime.now().date()
-        descricao = f"Cartão restaurado em {data_obs}."
-        
-        historico_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
-        cursor.execute(historico_query, (card_id, descricao, data_obs))
-        
-        # Commit da transação
-        cnx.commit()
-        
-        return jsonify({"message": "Cartão restaurado com sucesso"}), 200
-    except Exception as e:
-        if cnx:
-            cnx.rollback()
-        logger.error(f"Erro ao restaurar cartão: {e}")
-        return jsonify({"error": "Erro ao processar requisição"}), 500
-    finally:
-        if cursor:
-            cursor.close()
-        if cnx:
-            cnx.close()
-
-@app.route('/health', methods=['GET'])
-def health_check():
-    """
-    Endpoint para verificação de saúde da aplicação
-    """
-    try:
-        # Verificar conexão com o banco de dados
-        cnx = get_db_connection()
-        cursor = cnx.cursor()
-        cursor.execute("SELECT 1")
-        cursor.fetchone()
-        cursor.close()
-        cnx.close()
-        
-        return jsonify({
-            "status": "healthy",
-            "database": "connected",
-            "timestamp": datetime.now().isoformat()
-        }), 200
-    except Exception as e:
-        logger.error(f"Health check falhou: {e}")
-        return jsonify({
-            "status": "unhealthy",
-            "database": "disconnected",
-            "error": str(e),
-            "timestamp": datetime.now().isoformat()
-        }), 500
-
 if __name__ == '__main__':
-    # Obter porta do ambiente ou usar 5000 como padrão
     port = int(os.environ.get('PORT', 5000))
     
-    # Em produção, usar gunicorn ou outro servidor WSGI
-    # Em desenvolvimento, usar o servidor de desenvolvimento do Flask
     app.run(host='0.0.0.0', port=port)
