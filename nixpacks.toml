@@ -2,7 +2,7 @@
 nixPkgs = ["python311", "pip", "gcc", "mariadb"]
 
 [phases.install]
-cmds = ["pip install -r requirements.txt"]
+cmds = ["pip install -r backend/requirements.txt"]
 
 [phases.start]
 cmd = "gunicorn back_end:app"
