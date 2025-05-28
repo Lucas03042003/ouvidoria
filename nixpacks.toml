@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["python311", "pip", "gcc", "mysql"]
+nixPkgs = ["python311", "pip", "gcc", "mariadb"]
 
 [phases.install]
 cmds = ["pip install -r requirements.txt"]
