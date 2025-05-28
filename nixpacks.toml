@@ -1,0 +1,9 @@
+[phases.setup]
+# instala python3 (já vem) e expõe também o pip
+packages = [ "python3", "python3Packages.pip" ]
+
+[phases.build]
+commands = [
+  # já que o pip agora está no PATH, isso funciona sem prefixo
+  "pip install -r requirements.txt"
+]
