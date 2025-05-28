@@ -1,9 +1,9 @@
 [phases.setup]
 # gcc, mariadb e Python 3.11 + pip do conjunto python311Packages
 nixPkgs = [
-  "gcc"
-  "mariadb"
-  "python311"
+  "gcc",
+  "mariadb",
+  "python311",
   "python311Packages.pip"
 ]
 
