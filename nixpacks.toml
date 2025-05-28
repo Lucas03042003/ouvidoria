@@ -1,17 +1,16 @@
 [phases.setup]
-# Monta um Python 3.11 que já inclui o pip, além de gcc e mariadb
+# gcc, mariadb e Python 3.11 + pip do conjunto python311Packages
 nixPkgs = [
-  "gcc",
-  "mariadb",
-  "python311.withPackages (ps: [ ps.pip ])"
+  "gcc"
+  "mariadb"
+  "python311"
+  "python311Packages.pip"
 ]
 
 [phases.install]
-# Agora o pip já existe no PATH e pode instalar seus requisitos
 cmds = [
   "pip install -r backend/requirements.txt"
 ]
 
 [phases.start]
-# Comando de inicialização inalterado
 cmd = "gunicorn back_end:app"
