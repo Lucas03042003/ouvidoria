@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Instale dependências do sistema para o mysqlclient
+RUN apt-get update && apt-get install -y gcc default-libmysqlclient-dev
+
+# Copie os arquivos do projeto
+COPY . .
+
+# Instale as dependências Python
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Exponha a porta do Flask
+EXPOSE 5000
+
+# Comando para rodar o Flask
+CMD ["python", "back_end.py"]
