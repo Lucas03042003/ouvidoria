@@ -5,5 +5,5 @@ packages = [ "python3", "python3Packages.pip" ]
 [phases.build]
 commands = [
   # já que o pip agora está no PATH, isso funciona sem prefixo
-  "pip install -r backend/requirements.txt"
+  "pip install -r ./backend/requirements.txt"
 ]
