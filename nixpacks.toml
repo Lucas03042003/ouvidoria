@@ -1,9 +1,8 @@
 [phases.setup]
-# instala python3 (já vem) e expõe também o pip
-packages = [ "python3", "python3Packages.pip" ]
+nixPkgs = ["python311", "pip", "gcc", "mysql"]
 
-[phases.build]
-commands = [
-  # já que o pip agora está no PATH, isso funciona sem prefixo
-  "pip install -r ./backend/requirements.txt"
-]
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[phases.start]
+cmd = "gunicorn back_end:app"
