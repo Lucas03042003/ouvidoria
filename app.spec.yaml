@@ -1,42 +1,52 @@
 version: "1.0"
 name: ouvidoria-app
+
 services:
   - name: api
     github:
       repo: Lucas0304200/ouvidoria
       branch: main
-    build_command: pip install -r requirements.txt
-    run_command: python backend/back_end.py
+
+    # instala dependências do backend
+    build:
+      command: pip install -r backend/requirements.txt
+
+    # executa a aplicação Flask
+    run:
+      command: python backend/back_end.py
+
     envs:
-      - key: DB_HOST
-        value: ${db.HOSTNAME}
-      - key: DB_PORT
-        value: ${db.PORT}
-      - key: DB_USER
-        value: ${db.USERNAME}
-      - key: DB_PASSWORD
-        value: ${db.PASSWORD}
-      - key: DB_NAME
-        value: ${db.DATABASE}
-      - key: PORT
-        value: ${_self.PRIVATE_PORT}
+      DB_HOST:     ${db.HOSTNAME}
+      DB_PORT:     ${db.PORT}
+      DB_USER:     ${db.USERNAME}
+      DB_PASSWORD: ${db.PASSWORD}
+      DB_NAME:     ${db.DATABASE}
+      PORT:        ${_self.PRIVATE_PORT}
+
     health_check:
-      http_path: /health
+      http_path:           /health
       initial_delay_seconds: 10
-      period_seconds: 30
-      timeout_seconds: 5
-      success_threshold: 1
-      failure_threshold: 3
+      period_seconds:        30
+      timeout_seconds:       5
+      success_threshold:     1
+      failure_threshold:     3
 
   - name: frontend
     github:
       repo: seu-usuario/ouvidoria
-
       branch: main
-    build_command: echo "No build required"
-    output_dir: frontend/public
+
+    # sem build
+    build:
+      command: echo "No build required"
+
+    # onde estão os arquivos estáticos
+    static:
+      output_dir: frontend/public
+
     routes:
       - path: /
+
     cors:
       allow_origins:
         - regex: .*
@@ -59,5 +69,8 @@ databases:
     version: "8"
     production:
       cluster_size: basic
-    db_name: primare_ouvidoria
-    db_user: app_user
+
+    db_name:     primare_ouvidoria
+    db_user:     app_user
+    # o Railway irá gerar a senha; você pode expor como SECRET ou aguardar a criação
+    db_password: ${db.PASSWORD}
