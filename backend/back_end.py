@@ -17,6 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:5500"}})
 
 # Configuração do sistema
 DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
@@ -77,7 +78,7 @@ def verificar_login():
 
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
-        query = "SELECT * FROM usuarios WHERE email = %s AND senha = %s"
+        query = "SELECT * FROM Usuarios WHERE email = %s AND senha = %s"
         cursor.execute(query, (email, senha))
         resultado = cursor.fetchall()
         print(resultado)
@@ -96,7 +97,7 @@ def ativar_usuarios():
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
         
-        query = "SELECT id_user, email, permissoes FROM usuarios"
+        query = "SELECT id_user, email, permissoes FROM Usuarios"  # Corrigido para 'Usuarios'
         cursor.execute(query)
         resultado = cursor.fetchall()
         
@@ -246,7 +247,7 @@ def coletar_cartoes():
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
         
-        user_query = "SELECT permissoes FROM usuarios WHERE email = %s"
+        user_query = "SELECT permissoes FROM Usuarios WHERE email = %s"
         user_permission = None
         
         if email:
@@ -759,13 +760,16 @@ def criar_cartao():
         msg = data.get('mensagem')
         data_obs = datetime.now().date()
 
+        # Conexão com o banco de dados
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
 
+        # Escolher primeira etapa do fluxo
         GetFluxo = "select * from Fluxo"
         cursor.execute(GetFluxo)
         FluxoUm = cursor.fetchall()[0]
 
+        # Se não houver a tag "sem tag" na lista, ela será criada
         GetTags = "select * from Tags"
         cursor.execute(GetTags)
         tags = cursor.fetchall()
@@ -778,6 +782,7 @@ def criar_cartao():
                 SemTagID = tag["id_tag"]
         
         if sem_tag:
+            MakeTag = "INSERT INTO Tags (titulo, cor_tag, cor_texto) VALUES ('Sem Tag', '#333', 'F4F4F4')"
             cursor.execute(MakeTag)
             cnx.commit()
 
@@ -785,15 +790,18 @@ def criar_cartao():
             cursor.execute(GetSemTag)
             SemTagID = cursor.fetchall()[0]["id_tag"]
 
+        # Inserir no banco de dados
         query = "INSERT INTO Cartoes (Cliente, Data_comentario, Comentario, Etapa, Tag, Administrador, status) VALUES (%s, %s, %s, %s, %s, %s, 'normal')"
         cursor.execute(query, (nome, data_obs, msg, FluxoUm["id_fluxo"], SemTagID, 1))
         cnx.commit()
 
+        # Fechar o cursor e a conexão
         cursor.close()
         cnx.close()
 
+        # Retornar uma resposta de sucesso
         return jsonify({"success": True}), 200
-
+    
 # Mudar o status do cartão para excluído
 @app.route('/excluir-cartao', methods=['POST'])
 def excluir_cartao():
