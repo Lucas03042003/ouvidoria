@@ -17,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:5500"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Configuração do sistema
 DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
@@ -669,82 +669,32 @@ def atualizar_msg_historico():
             cnx.close()
 
 # Atualizar cartão
-@app.route('/atualizar-cartao', methods=['POST'])
+@app.route('/atualizar-tag-cartao', methods=['POST', 'OPTIONS'])
 def atualizar_cartao():
+    if request.method == 'OPTIONS':
+        return '', 204
+        
     try:
         data = request.json
-        valid, error_msg = validate_input(data, required_fields=['cardId'])
-        if not valid:
-            return jsonify({"error": error_msg}), 400
-            
         card_id = data.get('cardId')
-        
-        cliente = sanitize_input(data.get('cliente', ''))
-        comentario = sanitize_input(data.get('comentario', ''))
         tag_id = data.get('tag')
-        titulo_tag = sanitize_input(data.get('titulo_tag', ''))
-        cor_tag = sanitize_input(data.get('cor_tag', ''))
-        cor_texto = sanitize_input(data.get('cor_texto', ''))
+        titulo_tag = data.get('titulo_tag')
         
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
         
-        check_query = "SELECT ID_Cartao FROM Cartoes WHERE ID_Cartao = %s"
-        cursor.execute(check_query, (card_id,))
-        if not cursor.fetchone():
-            return jsonify({"error": "Cartão não encontrado"}), 404
-
-        cnx.start_transaction()
-        
-        update_fields = []
-        update_values = []
-        
-        if cliente:
-            update_fields.append("Cliente = %s")
-            update_values.append(cliente)
-            
-        if comentario:
-            update_fields.append("Comentario = %s")
-            update_values.append(comentario)
-            
-        if tag_id is not None:
-            update_fields.append("Tag = %s")
-            update_values.append(tag_id)
-            
-        if titulo_tag:
-            update_fields.append("titulo_tag = %s")
-            update_values.append(titulo_tag)
-            
-        if cor_tag:
-            update_fields.append("cor_tag = %s")
-            update_values.append(cor_tag)
-            
-        if cor_texto:
-            update_fields.append("cor_texto = %s")
-            update_values.append(cor_texto)
-            
-        if not update_fields:
-            return jsonify({"message": "Nenhum campo para atualizar"}), 200
-            
-        update_values.append(card_id)
-        
-        update_query = f"UPDATE Cartoes SET {', '.join(update_fields)} WHERE ID_Cartao = %s"
-        cursor.execute(update_query, tuple(update_values))
-        
-        data_obs = datetime.now().date()
-        descricao = f"O cartão foi atualizado em {data_obs}."
-        
-        historico_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
-        cursor.execute(historico_query, (card_id, descricao, data_obs))
+        # Atualiza a tag do cartão
+        update_query = "UPDATE Cartoes SET Tag = %s, titulo_tag = %s WHERE ID_Cartao = %s"
+        cursor.execute(update_query, (tag_id, titulo_tag, card_id))
         
         cnx.commit()
         
-        return jsonify({"message": "Cartão atualizado com sucesso"}), 200
+        return jsonify({"message": "Tag atualizada com sucesso", "newTag": titulo_tag}), 200
+
     except Exception as e:
-        if cnx:
-            cnx.rollback()
-        logger.error(f"Erro ao atualizar cartão: {e}")
-        return jsonify({"error": "Erro ao processar requisição"}), 500
+        logger.error(f"Erro ao atualizar tag: {e}")
+        return jsonify({"error": str(e)}), 500
+
     finally:
         if cursor:
             cursor.close()
