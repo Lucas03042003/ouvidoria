@@ -1,7 +1,7 @@
 // Função inicial para coletar os fluxos do banco de dados e, desse modo, ativar o Kanban
 window.fetchKanban = async function() {
     try {
-        const response = await fetch('http://127.0.0.1:5000/ativar-fluxo', {
+        const response = await fetch(`${window.BACKEND_URL}/ativar-fluxo`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -18,7 +18,7 @@ window.fetchKanban = async function() {
 // Função para buscar os cartões no banco de dados e, desse modo, ativar a visualização dos cartões
 window.fetchCartoes = async function(renderizar, status) {
     try {
-        const response = await fetch('http://127.0.0.1:5000/coletar-cartoes', {
+        const response = await fetch(`${window.BACKEND_URL}/coletar-cartoes`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -45,7 +45,7 @@ window.fetchCartoes = async function(renderizar, status) {
 // Coletar fluxos com a opção de renderizá-los
 window.fetchFluxos = async function(renderizar) {
     try {
-        const response = await fetch('http://127.0.0.1:5000/ativar-fluxo', {
+        const response = await fetch(`${window.BACKEND_URL}/ativar-fluxo`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -66,7 +66,7 @@ window.fetchFluxos = async function(renderizar) {
 // Coletar tags com a opção de renderizá-las
 window.fetchTags = async function(renderizar) {
     try {
-        const response = await fetch('http://127.0.0.1:5000/ativar-tag', {
+        const response = await fetch(`${window.BACKEND_URL}/ativar-tag`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -87,7 +87,7 @@ window.fetchTags = async function(renderizar) {
 // Coletar usuários com a opção de rederizá-los
 window.fetchUsuarios = async function(renderizar) {
     try {
-        const response = await fetch('http://127.0.0.1:5000/ativar-usuarios', {
+        const response = await fetch(`${window.BACKEND_URL}/ativar-usuarios`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -110,7 +110,7 @@ window.fetchHistorico = async function(id_cartao) {
     try {
         console.log('Iniciando fetchHistorico para o cartão:', id_cartao);
   
-        const response = await fetch('http://127.0.0.1:5000/ativar-historico', {
+        const response = await fetch(`${window.BACKEND_URL}/ativar-historico`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json', 
@@ -138,7 +138,7 @@ window.fetchHistorico = async function(id_cartao) {
 
 window.fetchSistemaConfig = async function() {
     try {
-      const response = await fetch('http://127.0.0.1:5000/ativar-sistema', {
+      const response = await fetch(`${window.BACKEND_URL}/ativar-sistema`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });

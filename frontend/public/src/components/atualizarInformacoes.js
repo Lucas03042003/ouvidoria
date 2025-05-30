@@ -10,7 +10,7 @@ window.atualizarEtapaCartao = async function(cardId, newFluxoId) {
     let nomeFluxo = fluxoFiltrado.nome; 
     console.log(nomeFluxo);
   
-    fetch('http://127.0.0.1:5000/api/atualizar-etapa-cartao', {
+    fetch(`${window.BACKEND_URL}/api/atualizar-etapa-cartao`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -39,7 +39,7 @@ window.atualizarEtapaCartao = async function(cardId, newFluxoId) {
 // Atualizar Histórico, especialmente ao adicionar uma mensagem no cartão expandido
 window.atualizarHistorico = async function(msg, id_cartao) {
 
-    await fetch('http://127.0.0.1:5000/atualizar-historico-msgs', {  
+    await fetch(`${window.BACKEND_URL}/atualizar-historico-msgs`, {  
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ window.atualizarNovoResponsavel = function(id_cartao) {
     var selection = document.getElementById("responsavel-select");
     var newResponsavel = selection.options[selection.selectedIndex].text;
   
-    fetch('http://127.0.0.1:5000/atualizar-responsavel', {  
+    fetch(`${window.BACKEND_URL}/atualizar-responsavel`, {  
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ window.atualizarNovaTag = async function(id_cartao) {
     let backColor = tag_nova['0'].cor_tag;
     let colorFont = tag_nova['0'].cor_texto;
   
-    fetch('http://127.0.0.1:5000/atualizar-tag-cartao', {  
+    fetch(`${window.BACKEND_URL}/atualizar-tag-cartao`, {  
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -180,7 +180,7 @@ function modificarCartao(id_cartao, novoTitulo, novaCorTag, novaCorTexto) {
 
 // Função auxiliar para enviar mudanças na configuração de fluxos para o servidor
 window.enviarParaServidorFluxo = function(dados) {
-  fetch('http://127.0.0.1:5000/salvar-fluxos', {
+  fetch(`${window.BACKEND_URL}/salvar-fluxos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dados)
@@ -196,7 +196,7 @@ window.salvarConfiguracao = async function() {
   const isActive = toggleSwitch.classList.contains('active');
 
   try {
-    const response = await fetch('http://127.0.0.1:5000/atualizar-sistema', {
+    const response = await fetch(`${window.BACKEND_URL}/atualizar-sistema`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ config1: isActive }) // Envia o estado atual do switch
@@ -216,7 +216,7 @@ window.salvarConfiguracao = async function() {
 // Enviar alterações nas configurações de usuários para o servidor
 window.enviarParaServidorUsers = function() {
   
-  fetch('http://127.0.0.1:5000/salvar-usuarios', {
+  fetch(`${window.BACKEND_URL}/salvar-usuarios`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(window.todosOsUsuarios)
@@ -239,7 +239,7 @@ async function enviarParaServidorTags() {
     atualizarCores(id_tag);
   });
 
-  fetch('http://127.0.0.1:5000/salvar-tags', {
+  fetch(`${window.BACKEND_URL}/salvar-tags`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(window.todasAsTags)
@@ -256,7 +256,7 @@ window.mudarStatus = async function(id_cartao, status, titulo, cor_tag, cor_text
   try {
     console.log('Iniciando mudarStatus para o cartão:', id_cartao);
   
-    const response = await fetch('http://127.0.0.1:5000/atualizar-status', {
+    const response = await fetch(`${window.BACKEND_URL}/atualizar-status`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json', 
