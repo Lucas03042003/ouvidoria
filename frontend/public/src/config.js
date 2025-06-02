@@ -1,1 +1,1 @@
-window.BACKEND_URL = "https://ouvidoria-production.up.railway.app";
+window.BACKEND_URL = 'https://ouvidoria-production.up.railway.app';
