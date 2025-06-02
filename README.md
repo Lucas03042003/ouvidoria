@@ -12,11 +12,8 @@ Um sistema de Serviço de Atendimento ao Cliente (SAC) que permite gerenciar fee
 ### Para Administradores
 - Sistema de login com diferentes níveis de permissão
 - Quadro Kanban para gerenciamento de solicitações (index.html)
-- Acompanhamento do status das solicitações em 3 colunas:
-  - Início
-  - Encaminhamento 
-  - Conclusão
-- Tags para priorização (Alta, Média, Baixa)
+- Acompanhamento do status das solicitações em colunas personalizáveis:
+- Tags para priorização customizáveis
 - Histórico de alterações por cartão
 
 ## 📁 Estrutura do Projeto
@@ -43,7 +40,7 @@ ouvidoria/
 - **Frontend**: HTML, CSS, JavaScript
 - **Backend**: Python com Flask
 - **Banco de Dados**: MySQL
-- **Deploy**: Railway
+- **Deploy**: Railway e Vercel
 
 ## 💾 Banco de Dados
 
@@ -65,13 +62,10 @@ O sistema utiliza as seguintes tabelas:
 
 ## 🚀 Deploy
 
-O projeto está configurado para deploy no Railway através do arquivo `app.spec.yaml`, que define:
+O projeto está configurado para deploy no Railway através do arquivo `nixpacks.toml`, que define:
 
-- Serviços Backend e Frontend
-- Configuração do banco de dados
+- Serviços Backend
 - Variáveis de ambiente
-- Políticas de CORS
-- Health checks
 
 ## 🛣️ Fluxo do Sistema
 
@@ -83,12 +77,15 @@ O projeto está configurado para deploy no Railway através do arquivo `app.spec
    - Mover cartões entre colunas
    - Atribuir prioridades
    - Adicionar observações
+   - Configurar o fluxo kanban
+   - Cofigurar as tags disponíveis, sem que isso afete os cartões finalizados ou excluídos
+   - Adicionar novos usuários ao sistema
    - Finalizar solicitações
 
 ## 🔧 Configuração
 
 1. Clone o repositório
-2. Configure as variáveis de ambiente no `app.spec.yaml`
-3. Execute o script do banco de dados
+2. Execute o script do banco de dados
+3. Configure o config.js para mudar o host do seu banco de dados
 4. Instale as dependências do backend
 5. Inicie o servidor Flask
