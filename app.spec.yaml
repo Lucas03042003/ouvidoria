@@ -62,15 +62,3 @@ services:
       expose_headers:
         - Content-Length
       max_age: 86400
-
-databases:
-  - name: db
-    engine: MYSQL
-    version: "8"
-    production:
-      cluster_size: basic
-
-    db_name:     primare_ouvidoria
-    db_user:     app_user
-    # o Railway irá gerar a senha; você pode expor como SECRET ou aguardar a criação
-    db_password: ${db.PASSWORD}
