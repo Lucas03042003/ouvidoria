@@ -3,7 +3,8 @@ create database primare_ouvidoria;
 use primare_ouvidoria;
 
 CREATE TABLE Config (
-	config1 boolean PRIMARY KEY
+    chave VARCHAR(100) PRIMARY KEY,
+    valor VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE Tags (
