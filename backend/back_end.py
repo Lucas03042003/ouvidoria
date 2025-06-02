@@ -767,108 +767,76 @@ def criar_cartao():
 
         # Retornar uma resposta de sucesso
         return jsonify({"success": True}), 200
-    
-# Mudar o status do cartão para excluído
-@app.route('/excluir-cartao', methods=['POST'])
-def excluir_cartao():
-    try:
-        data = request.json
-        valid, error_msg = validate_input(data, required_fields=['cardId'])
-        if not valid:
-            return jsonify({"error": error_msg}), 400
-            
-        card_id = data.get('cardId')
-        
-        cnx = get_db_connection()
-        cursor = cnx.cursor(dictionary=True)
-        
-        check_query = "SELECT ID_Cartao, status FROM Cartoes WHERE ID_Cartao = %s"
-        cursor.execute(check_query, (card_id,))
-        cartao = cursor.fetchone()
-        
-        if not cartao:
-            return jsonify({"error": "Cartão não encontrado"}), 404
-            
-        if cartao['status'] != 'normal':
-            return jsonify({"error": "Cartão já está excluído ou finalizado"}), 400
-        
-        cnx.start_transaction()
-        
-        update_query = "UPDATE Cartoes SET status = 'excluido' WHERE ID_Cartao = %s"
-        cursor.execute(update_query, (card_id,))
-        
-        data_obs = datetime.now().date()
-        descricao = f"Cartão excluído em {data_obs}."
-        
-        historico_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
-        cursor.execute(historico_query, (card_id, descricao, data_obs))
-        
-        cnx.commit()
-        
-        return jsonify({"message": "Cartão excluído com sucesso"}), 200
-    except Exception as e:
-        if cnx:
-            cnx.rollback()
-        logger.error(f"Erro ao excluir cartão: {e}")
-        return jsonify({"error": "Erro ao processar requisição"}), 500
-    finally:
-        if cursor:
-            cursor.close()
-        if cnx:
-            cnx.close()
 
-# Mudar o status do cartão para finalizado
-@app.route('/finalizar-cartao', methods=['POST'])
-def finalizar_cartao():
+# Atualizar status do cartão
+@app.route('/atualizar-status', methods=['POST'])
+def atualizar_status():
     try:
-        data = request.json
-        valid, error_msg = validate_input(data, required_fields=['cardId'])
-        if not valid:
-            return jsonify({"error": error_msg}), 400
-            
-        card_id = data.get('cardId')
-        
-        cnx = get_db_connection()
-        cursor = cnx.cursor(dictionary=True)
-        
-        check_query = "SELECT ID_Cartao, status FROM Cartoes WHERE ID_Cartao = %s"
-        cursor.execute(check_query, (card_id,))
+        dados = request.get_json()
+
+        card_id = dados.get('cardId')
+        status = dados.get('status')
+        titulo = dados.get('titulo')
+        cor_tag = dados.get('cor_tag')
+        cor_texto = dados.get('cor_texto')
+        nome_admin = dados.get('Nome_admin')
+
+        if not all([card_id, status, titulo, cor_tag, cor_texto, nome_admin]):
+            return jsonify({"erro": "Dados incompletos"}), 400
+
+        conexao = get_db_connection()
+        cursor = conexao.cursor()
+
+        # Verifica se o cartão existe
+        cursor.execute("SELECT * FROM Cartoes WHERE ID_Cartao = %s", (card_id,))
         cartao = cursor.fetchone()
-        
+
         if not cartao:
-            return jsonify({"error": "Cartão não encontrado"}), 404
-            
-        if cartao['status'] != 'normal':
-            return jsonify({"error": "Cartão já está excluído ou finalizado"}), 400
-        
-        data_conclusao = datetime.now().date()
-        
-        cnx.start_transaction()
-        
-        update_query = "UPDATE Cartoes SET status = 'finalizado', Data_conclusao = %s WHERE ID_Cartao = %s"
-        cursor.execute(update_query, (data_conclusao, card_id))
-        
-        descricao = f"Cartão finalizado em {data_conclusao}."
-        
-        historico_query = "INSERT INTO Historico (cartao, descricao, data_mudanca) VALUES (%s, %s, %s)"
-        cursor.execute(historico_query, (card_id, descricao, data_conclusao))
-        
-        cnx.commit()
-        
-        return jsonify({
-            "message": "Cartão finalizado com sucesso",
-            "data_conclusao": data_conclusao.strftime('%Y-%m-%d')
-        }), 200
+            return jsonify({"erro": "Cartão não encontrado"}), 404
+
+        # Atualiza os campos que não são foreign keys
+        update_query = """
+            UPDATE Cartoes 
+            SET status = %s, 
+                titulo_tag = %s, 
+                cor_tag = %s, 
+                cor_texto = %s, 
+                Nome_admin = %s 
+            WHERE ID_Cartao = %s
+        """
+
+        valores = (status, titulo, cor_tag, cor_texto, nome_admin, card_id)
+
+        cursor.execute(update_query, valores)
+        conexao.commit()
+
+        data_atual = datetime.now().strftime('%Y-%m-%d')
+        descricao = f"O cartão foi movido para a etapa '{status}' por {nome_admin} no dia {data_atual}."
+
+        insert_historico = """
+            INSERT INTO Historico (cartao, descricao, data_mudanca)
+            VALUES (%s, %s, %s)
+        """
+        cursor.execute(insert_historico, (card_id, descricao, datetime.now().date()))
+
+        conexao.commit()
+
+        return jsonify({"mensagem": "Cartão atualizado e histórico registrado com sucesso!"}), 200
+
+
     except Exception as e:
-        if cnx:
-            cnx.rollback()
-        logger.error(f"Erro ao finalizar cartão: {e}")
-        return jsonify({"error": "Erro ao processar requisição"}), 500
+        print("Erro no MySQL:", e)
+        return jsonify({"erro": str(e)}), 500
+
+    except Exception as e:
+        print("Erro geral:", e)
+        return jsonify({"erro": str(e)}), 500
+
     finally:
         if cursor:
             cursor.close()
-        if cnx:
-            cnx.close()
+        if conexao:
+            conexao.close()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
