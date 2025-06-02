@@ -119,7 +119,10 @@ window.atualizarNovaTag = async function(id_cartao) {
       },
       body: JSON.stringify({
           cardId: id_cartao,
-          newTag: newTag,
+          tag: newTagId,
+          titulo_tag: newTag,
+          cor_tag: backColor,
+          cor_texto: colorFont,
           login: window.email
       })
     })
@@ -139,6 +142,19 @@ window.atualizarNovaTag = async function(id_cartao) {
   
     adicionarTagHistorico(newTag);
     modificarCartao(id_cartao, newTag, backColor, colorFont);
+};
+  
+function adicionarTagHistorico(newTag) {
+  
+    let new_tag = newTag;
+    let msg = `A tag do cartão foi modificada para ${new_tag}.`
+  
+    const textMsg = document.createElement('p');
+    textMsg.innerHTML = `- ${msg}`;
+  
+    const historico = document.getElementById("info-txt-historico");
+    historico.appendChild(textMsg);
+  
 };
   
 function adicionarTagHistorico(newTag) {

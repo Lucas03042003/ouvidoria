@@ -8,7 +8,7 @@ CREATE TABLE Config (
 
 CREATE TABLE Tags (
     id_tag INT PRIMARY KEY AUTO_INCREMENT,
-    titulo VARCHAR(100) NOT NULL UNIQUE,  -- Assegurando unicidade de 'titulo'
+    titulo VARCHAR(100) NOT NULL UNIQUE,
     cor_tag VARCHAR(100) NOT NULL,
     cor_texto VARCHAR(100) NOT NULL
 );
@@ -23,7 +23,7 @@ CREATE TABLE Usuarios (
 CREATE TABLE Fluxo (
     id_fluxo INT PRIMARY KEY AUTO_INCREMENT,
     posicao INT NOT NULL,
-    nome VARCHAR(100) NOT NULL UNIQUE  -- Assegurando unicidade de 'nome'
+    nome VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE Cartoes (

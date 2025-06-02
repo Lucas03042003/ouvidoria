@@ -679,13 +679,29 @@ def atualizar_cartao():
         card_id = data.get('cardId')
         tag_id = data.get('tag')
         titulo_tag = data.get('titulo_tag')
+        cor_tag = data.get('cor_tag')
+        cor_texto = data.get('cor_texto')
+        login = data.get('login')
         
         cnx = get_db_connection()
         cursor = cnx.cursor(dictionary=True)
         
-        # Atualiza a tag do cartão
-        update_query = "UPDATE Cartoes SET Tag = %s, titulo_tag = %s WHERE ID_Cartao = %s"
-        cursor.execute(update_query, (tag_id, titulo_tag, card_id))
+        # Atualiza a tag do cartão com todas as informações
+        update_query = """
+            UPDATE Cartoes 
+            SET Tag = %s, titulo_tag = %s, cor_tag = %s, cor_texto = %s 
+            WHERE ID_Cartao = %s
+        """
+        cursor.execute(update_query, (tag_id, titulo_tag, cor_tag, cor_texto, card_id))
+        
+        # Adiciona ao histórico
+        data_mudanca = datetime.now().date()
+        historico_query = """
+            INSERT INTO Historico (cartao, descricao, data_mudanca) 
+            VALUES (%s, %s, %s)
+        """
+        descricao = f"Tag alterada para '{titulo_tag}' por {login}"
+        cursor.execute(historico_query, (card_id, descricao, data_mudanca))
         
         cnx.commit()
         
